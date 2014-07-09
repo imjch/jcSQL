@@ -1,6 +1,7 @@
 ##jcSQL##
 
 This project is a simple implementation of a executable engine of SQL which matches my own interest.
+<<<<<<< HEAD:README
 
 
 ###jcSQL's first stage of the representation :###
@@ -30,3 +31,5 @@ This project is a simple implementation of a executable engine of SQL which matc
 It is incomplete and needs improving,;p
 
 Well...maybe the grammar will be altered gradually during the development process of the compiler.  
+=======
+>>>>>>> f9b5c56e320302931d7576d4334f5ada096f0539:README.md

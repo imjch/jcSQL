@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <stdexcept>
-#include <cassert>
+#include "processor_factory.h"
+
 parser::parser(lexer& lexer) :input(lexer), lookahead(input.next_token())
 {
 }
@@ -10,11 +11,9 @@ parser::~parser()
 {
 }
 
-void parser::list()
+void parser::execute()
 {
-    match(lexer::LPARENTHESIS);
-    elements();
-    match(lexer::RPARENTHESIS);
+    //todo
 }
 
 void parser::elements()
@@ -29,13 +28,13 @@ void parser::elements()
 
 void parser::element()
 {
-    if (lookahead.get_token_type()==lexer::NAME)
+    if (lookahead.get_token_type() == lexer::IDENTIFIER)
     {
-        match(lexer::NAME);
+        match(lexer::IDENTIFIER);
     }
-    else if (lookahead.get_token_type()==lexer::LPARENTHESIS)
+    else if (lookahead.get_token_type() == lexer::LBRACKET)
     {
-        list();
+        //todo
     }
     else
     {
