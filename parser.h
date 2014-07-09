@@ -5,7 +5,7 @@ class parser
 public:
     parser(lexer&);
     ~parser();
-    void list();
+    void execute();
     void elements();
     void element();
 private:
