@@ -5,7 +5,8 @@ processor::processor()
 {
 
 }
-processor::processor(int t) :type(t)
+
+processor::~processor()
 {
 
 }

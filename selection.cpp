@@ -1,7 +1,7 @@
 #include "selection.h"
 
 #include "lexer.h"
-selection::selection() :processor(lexer::SELECT)
+selection::selection()
 {
 }
 
@@ -9,4 +9,6 @@ selection::selection() :processor(lexer::SELECT)
 selection::~selection()
 {
 }
-void selection::execute(){}
+void selection::execute()
+{
+}

@@ -8,7 +8,6 @@ public:
     int get_processor_type() const;
 protected:
     processor();
-    processor(int t);
     virtual ~processor();
 
 protected:
