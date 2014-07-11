@@ -7,11 +7,11 @@
 #include "err_msg_mgr.h"
 
 const std::string lexer::token_names[] = {
-    "N/A","<EOF>","IDENTIFIER","SINGLEQUOTE",
-    "DOUBLEQUOTE","COMMA","LBRACKET",
-    "RBRACKET","LESSOP","MOREOP","LEOP",
-    "MEOP","NEOP","EQOP","NUM","CHARS",
-    "ARROW","STRING"};
+    "N/A", "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
+    "DOUBLEQUOTE", "COMMA", "LBRACKET",
+    "RBRACKET", "LESSOP", "MOREOP", "LEOP",
+    "MEOP", "NEOP", "EQOP", "NUM", "CHARS",
+    "ARROW", "STRING" };
 
 token::token(int type, const char* text) :type(type), text(text)
 {
@@ -20,7 +20,7 @@ token::token(int type, const char* text) :type(type), text(text)
 
 token::~token()
 {
-   
+
 }
 
 int token::get_token_type()
@@ -41,7 +41,7 @@ const std::string lexer::get_token_name(int type)
 
 void lexer::WS()
 {
-    while (c==' '||c=='\t'||c=='\n'||c=='\r')
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r')
     {
         consume();
     }
@@ -77,56 +77,59 @@ token lexer::NUMS()
     return token(lexer::NUM, buf.c_str());
 }
 
-//token lexer::STRINGS_WITH_SINGLEQUOTE()
-//{
-//    return token(lexer::STRING, _STRINGS('"').c_str());
-//}
 
-token lexer::STRINGS_WITH_QUOTE(char quote)
-{
-    return token(lexer::STRING, _STRINGS(quote).c_str());
-}
-
-std::string lexer::_STRINGS(int ch)
+std::string lexer::STRINGS_WITH_TERMINATION(char ch)
 {
     std::string buf;
-    do
+    while (c != ch&&c != EOF)
     {
         buf.push_back(c);
         consume();
-      
-        if (c=='\\')
+        if (c == '\\')
         {
             buf.push_back(c);
             consume();
             buf.push_back(c);
             consume();
         }
-    } while (c != ch);
+    }
     return std::string(buf);
 }
 
 
 
+
 token lexer::next_token()
 {
-    if (c0=='\''&&single_quote_number%2==1)
+    if (!string_identifier.first.empty())//string_identifier.first stores the quotes
     {
-        single_quote_number = 1;
-        return STRINGS_WITH_QUOTE('\'');
+        if (string_identifier.first.top()==c)
+        {
+            consume();
+            string_identifier.first.pop();
+            return token(lexer::SINGLEQUOTE,"'");
+        }
+        else
+        {
+            std::string id = STRINGS_WITH_TERMINATION(string_identifier.first.top()).c_str();
+            token tk(lexer::STRING, id.c_str());
+            if (!id.empty())
+            {
+                return token(tk);
+            }
+        }
     }
-    if (c0=='"'&&double_quote_number % 2 == 1)
-    {
-        double_quote_number = 1;
-        return STRINGS_WITH_QUOTE('"');
-    }
-    while (c!=EOF)
+
+    while (c != EOF)
     {
         switch (c)
         {
         case ' ':case '\t':case '\n':case '\r':
             WS();
             continue;
+        case ',':
+            consume();
+            return token(COMMA, ",");
         case '<':
             consume();
             if (c == '=')
@@ -141,8 +144,16 @@ token lexer::next_token()
             }
             else
             {
-                return token(lexer::LESSOP,"<");
+                return token(lexer::LESSOP, "<");
             }
+        case '\'':
+            consume();
+            string_identifier.first.push('\'');
+            return token(SINGLEQUOTE, "'");
+        case '"':
+            consume();
+            string_identifier.first.push('"');
+            return token(DOUBLEQUOTE, "\"");
         case '>':
             consume();
             if (c == '=')
@@ -170,17 +181,6 @@ token lexer::next_token()
         case '=':
             consume();
             return token(EQOP, "=");
-        case '\'':
-            ++single_quote_number;
-            consume();
-            return token(SINGLEQUOTE, "'");
-        case '"':
-            ++double_quote_number;
-            consume();
-            return token(DOUBLEQUOTE, "\"");
-        case ',':
-            consume();
-            return token(COMMA, ",");
         case '[':
             consume();
             return token(LBRACKET, "[");
@@ -201,10 +201,9 @@ token lexer::next_token()
     return token(EOF_TYPE, "<EOF>");
 }
 
-
-lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0), single_quote_number(0),double_quote_number(0)
+lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0)
 {
-
+    
 }
 
 lexer::~lexer()
@@ -217,13 +216,12 @@ lexer::~lexer()
 void lexer::consume()
 {
     ++p;
-    if (p>=input.size())
+    if (p >= input.size())
     {
         c = EOF;
     }
     else
     {
-        c0 = c;
         c = input[p];
     }
 }
@@ -237,21 +235,5 @@ bool lexer::isnum(int c)
     }
     return false;
 }
-//void lexer::match(char x)
-//{
-//    if (c==x)
-//    {
-//        consume();
-//    }
-//    else
-//    {
-//        std::string error_msg("expecting ");
-//        error_msg.push_back(x);
-//        error_msg.append("; found ");
-//        error_msg.push_back(c);
-//        throw std::runtime_error(error_msg);
-//    }
-//}
-
 
 

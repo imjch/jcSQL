@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
-#include <tuple>
+#include <utility>
+#include <stack>
+
 class token
 {
 public:
@@ -20,13 +22,6 @@ private:
 class lexer
 {
 public:
-
-    void WS();
-    token IDENTIFIERS();
-    token NUMS();
-    //token STRINGS_WITH_SINGLEQUOTE();
-    token STRINGS_WITH_QUOTE(char);
-    static const std::string get_token_name(int type);
     token next_token();
     
     lexer(const std::string&);
@@ -49,17 +44,23 @@ public:
     static const int CHARS = 15;
     static const int ARROW = 16;
     static const int STRING = 17;
+
+    static const std::string get_token_name(int type);
 private:
+    typedef std::string char_list;
+    typedef std::stack<char> quote_list;
     void consume();
     bool isnum(int);
-    std::string _STRINGS(int);
-    static const std::string token_names[];
+    
+    void WS();
+    token IDENTIFIERS();
+    token NUMS();
+    std::string STRINGS_WITH_TERMINATION(char);
 
     std::string input;
     char c;
-    char c0;
     size_t p;
-    size_t single_quote_number;
-    size_t double_quote_number;
+    std::pair<quote_list, char_list> string_identifier;
+    static const std::string token_names[];
 };
 
