@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
 #include <string>
+
 class char_container
 {
 public:

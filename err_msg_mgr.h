@@ -5,10 +5,10 @@
 class err_msg_mgr
 {
 public:
-    static std::string& invlid_token(char *format,...)
+    static std::string invlid_expression(char *format,...)
     {
         char buff[BUFSIZ];
-        std::string msg("invlid token:");
+        std::string msg("error:");
 
         va_list args;
         _crt_va_start(args, format);

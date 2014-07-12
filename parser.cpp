@@ -1,7 +1,8 @@
 #include "parser.h"
 #include <stdexcept>
-#include "processor_factory.h"
-
+#include "operation_factory.h"
+#include "log.h"
+#include "err_msg_mgr.h"
 parser::parser(lexer& lexer) :input(lexer), lookahead(input.next_token())
 {
 }
@@ -13,51 +14,33 @@ parser::~parser()
 
 void parser::execute()
 {
-    //todo
+    stmts();
 }
 
-void parser::elements()
+void parser::stmts()
 {
-    element();
-    while (lookahead.get_token_type()==lexer::COMMA)
-    {
-        match(lexer::COMMA);
-        element();
-    }
+    //switch (lookahead.get_token_type())
+    //{
+
+    ////default:
+    ////    log::write_line(err_msg_mgr::invlid_expression("invalid type of operation %s", lookahead.to_string()).c_str());
+    ////    return;
+    //}
 }
 
-void parser::element()
-{
-    if (lookahead.get_token_type() == lexer::IDENTIFIER)
-    {
-        match(lexer::IDENTIFIER);
-    }
-    else if (lookahead.get_token_type() == lexer::LBRACKET)
-    {
-        //todo
-    }
-    else
-    {
-        std::string err_msg("expecting name or list£»found");
-        err_msg.append((lookahead.to_string()));
-        throw std::runtime_error(err_msg);
-    }
-}
 
 void parser::match(int x)
 {
     if (lookahead.get_token_type() == x)
     {
-        consume();
+        move();
     }
     else
     {
-        std::string error_msg("expecting ");
-        error_msg.append(lexer::get_token_name(x)).append("; found ").append(lookahead.to_string());
-        throw std::runtime_error(error_msg);
+        log::write_line(err_msg_mgr::invlid_expression("expecting %s; found %s", lexer::get_token_name(x), lookahead.to_string()).c_str());
     }
 }
-void parser::consume()
+void parser::move()
 {
     lookahead = input.next_token();
 }

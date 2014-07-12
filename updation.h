@@ -1,7 +1,7 @@
 #pragma once
-#include "processor.h"
+#include "operation.h"
 class updation :
-    public processor
+    public operation
 {
 public:
     updation();

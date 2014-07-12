@@ -1,6 +1,6 @@
 #pragma once
-#include "processor.h"
-class creation :public processor
+#include "operation.h"
+class creation :public operation
 {
 public:
     creation();

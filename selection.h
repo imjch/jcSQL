@@ -1,9 +1,9 @@
 #pragma once
-#include "processor.h"
+#include "operation.h"
 #include <string>
 #include <vector>
 class selection :
-    public processor
+    public operation
 {
 public:
     selection();

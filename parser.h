@@ -6,11 +6,11 @@ public:
     parser(lexer&);
     ~parser();
     void execute();
-    void elements();
-    void element();
+    void stmts();
+   
 private:
     void match(int);
-    void consume();
+    void move();
     lexer input;
     token lookahead;
 };

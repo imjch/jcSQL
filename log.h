@@ -9,14 +9,6 @@
 class file_manager
 {
 public:
-
-    static std::string get_current_directory()
-    {
-        char buffer[BUFSIZ];
-        GetCurrentDirectoryA(BUFSIZ, buffer);
-        return std::string(buffer);
-    }
-
     file_manager(const std::string& path) :file_path(path), file(path, std::fstream::out | std::fstream::app)
     {
         is_success();
@@ -63,6 +55,7 @@ public:
         file.write(content.c_str(), content.size());
     }
 
+    static std::string get_current_directory();
 private:
     void is_success()
     {
@@ -79,34 +72,11 @@ private:
 class log
 {
 public:
-
-    static void write_with_clear(const char* content)
-    {
-        file.clear();
-        file.write(std::string(content));
-        file.close();
-    }
-
-    static void write_append(const char* content)
-    {
-        file.open(path);
-        file.write(content);
-        file.close();
-    }
-
-    static void write_line(const char* content)
-    {
-        std::string str(content);
-        str.append("\n");
-        file.open(path);
-        file.write(str);
-        file.close();
-    }
+    static void write_with_clear(const char*);
+    static void write_append(const char*);
+    static void write_line(const char*);
 
 private:
     static std::string path;
     static file_manager file;
-
 };
-std::string log::path(file_manager::get_current_directory().append("\\ERR_LOG.log"));
-file_manager log::file;

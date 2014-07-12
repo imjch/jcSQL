@@ -1,6 +1,6 @@
 #pragma once
-#include "processor.h"
-class deletion : public processor
+#include "operation.h"
+class deletion : public operation
 {
 public:
     deletion();

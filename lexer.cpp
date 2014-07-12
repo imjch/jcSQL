@@ -2,16 +2,15 @@
 #include <string>
 #include <stdexcept>
 #include <cctype>
-#include "processor.h"
+#include "operation.h"
 #include "log.h"
 #include "err_msg_mgr.h"
 
-const std::string lexer::token_names[] = {
-    "N/A", "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
+const std::string lexer::token_names[] = {"N/A",
+    "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
     "DOUBLEQUOTE", "COMMA", "LBRACKET",
-    "RBRACKET", "LESSOP", "MOREOP", "LEOP",
-    "MEOP", "NEOP", "EQOP", "NUM", "CHARS",
-    "ARROW", "STRING" };
+    "RBRACKET", "ARROW", "NUM",
+    "BASIC_TYPE","OPERATION_TYPE","LOGIC_TYPE" };
 
 token::token(int type, const char* text) :type(type), text(text)
 {
@@ -46,7 +45,7 @@ void lexer::WS()
         consume();
     }
 }
-token lexer::IDENTIFIERS()
+std::string lexer::IDENTIFIERS()
 {
     std::string buf;
     do
@@ -54,11 +53,10 @@ token lexer::IDENTIFIERS()
         buf.push_back(c);
         consume();
     } while (isalnum(c));
-
-    return token(IDENTIFIER, buf.c_str());
+    return std::string(buf);
 }
 
-token lexer::NUMS()
+std::string lexer::NUMS()
 {
     std::string buf;
     do
@@ -74,9 +72,8 @@ token lexer::NUMS()
             consume();
         } while (isnum(c));
     }
-    return token(lexer::NUM, buf.c_str());
+    return std::string(buf);
 }
-
 
 std::string lexer::STRINGS_WITH_TERMINATION(char ch)
 {
@@ -96,23 +93,25 @@ std::string lexer::STRINGS_WITH_TERMINATION(char ch)
     return std::string(buf);
 }
 
-
-
-
 token lexer::next_token()
 {
-    if (!string_identifier.first.empty())//string_identifier.first stores the quotes
+    if (!quote_stack.empty())//string_identifier.first stores the quotes
     {
-        if (string_identifier.first.top()==c)
+        if (quote_stack.top() == c)
         {
             consume();
-            string_identifier.first.pop();
-            return token(lexer::SINGLEQUOTE,"'");
+            char temp = quote_stack.top();
+            quote_stack.pop();
+            if (temp=='\'')
+            {
+                return token(tag::SINGLEQUOTE, "'");
+            }
+            return token(tag::DOUBLEQUOTE, "\"");
         }
         else
         {
-            std::string id = STRINGS_WITH_TERMINATION(string_identifier.first.top()).c_str();
-            token tk(lexer::STRING, id.c_str());
+            std::string id = STRINGS_WITH_TERMINATION(quote_stack.top()).c_str();
+            token tk(tag::BASIC_TYPE, id.c_str());
             if (!id.empty())
             {
                 return token(tk);
@@ -129,81 +128,102 @@ token lexer::next_token()
             continue;
         case ',':
             consume();
-            return token(COMMA, ",");
+            return token(tag::COMMA, ",");
+        case '[':
+            consume();
+            return token(tag::LBRACKET, "[");
+        case ']':
+            consume();
+            return token(tag::RBRACKET, "]");
+        case '\'':
+            consume();
+            quote_stack.push('\'');
+            return token(tag::SINGLEQUOTE, "'");
+        case '"':
+            consume();
+            quote_stack.push('"');
+            return token(tag::DOUBLEQUOTE, "\"");
         case '<':
             consume();
-            if (c == '=')
+            if (c == '-')
             {
                 consume();
-                return token(LEOP, "<=");
+                return token(tag::ARROW, "<-");
             }
-            else if (c == '-')
+            else if (c == '=')
             {
                 consume();
-                return token(lexer::ARROW, "<-");
+                return token(tag::LOGIC_TYPE, "<=");
             }
             else
             {
-                return token(lexer::LESSOP, "<");
+                return token(tag::LOGIC_TYPE, "<");
             }
-        case '\'':
-            consume();
-            string_identifier.first.push('\'');
-            return token(SINGLEQUOTE, "'");
-        case '"':
-            consume();
-            string_identifier.first.push('"');
-            return token(DOUBLEQUOTE, "\"");
         case '>':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(MEOP, ">=");
+                return token(tag::LOGIC_TYPE, ">=");
             }
             else
             {
-                consume();
-                return token(MOREOP, ">");
+                return token(tag::LOGIC_TYPE,">");
             }
+        case '=':
+            consume();
+            return token(tag::LOGIC_TYPE, "=");
         case '!':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(NEOP, "!=");
+                return token(tag::LOGIC_TYPE,"!=");
             }
             else
             {
-                consume();
-                log::write_line(err_msg_mgr::invlid_token("!%c", c).c_str());
+                log::write_line(err_msg_mgr::invlid_expression("invalid token !%c", c).c_str());
             }
-        case '=':
-            consume();
-            return token(EQOP, "=");
-        case '[':
-            consume();
-            return token(LBRACKET, "[");
-        case ']':
-            consume();
-            return token(RBRACKET, "]");
         default:
             if (isalpha(c))
             {
-                return IDENTIFIERS();
+                 std::string id=IDENTIFIERS();
+                 if (key_words.contain_key(id))
+                 {
+                     return token(key_words[id],id.c_str());
+                 }
+                 return token(tag::IDENTIFIER,id.c_str());
             }
             if (isnum(c))
             {
-                return NUMS();
+                 return token(tag::NUM,NUMS().c_str());
             }
         }
     }
-    return token(EOF_TYPE, "<EOF>");
+    return token(tag::EOF_TYPE, "<EOF>");
 }
 
 lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0)
 {
-    
+    //key_words.add_key_word("'", tag::SINGLEQUOTE);
+    //key_words.add_key_word("\"", tag::DOUBLEQUOTE);
+    //key_words.add_key_word(",", tag::COMMA);
+    //key_words.add_key_word("[", tag::LBRACKET);
+    //key_words.add_key_word("]", tag::RBRACKET);
+    //key_words.add_key_word("<", tag::LESSOP);
+    //key_words.add_key_word(">", tag::MOREOP);
+    //key_words.add_key_word("<=", tag::LEOP);
+    //key_words.add_key_word(">=", tag::MEOP);
+    //key_words.add_key_word("!=", tag::NEOP);
+    //key_words.add_key_word("=", tag::EQOP);
+    //key_words.add_key_word("<-", tag::ARROW);
+    key_words.add_key_word("create", tag::OPERATION_TYPE);
+    key_words.add_key_word("drop", tag::OPERATION_TYPE);
+    key_words.add_key_word("alter", tag::OPERATION_TYPE);
+    key_words.add_key_word("insert", tag::OPERATION_TYPE);
+    key_words.add_key_word("int", tag::BASIC_TYPE);
+    key_words.add_key_word("string", tag::BASIC_TYPE);
+    key_words.add_key_word("double", tag::BASIC_TYPE);
 }
 
 lexer::~lexer()
@@ -211,29 +231,14 @@ lexer::~lexer()
 
 }
 
-
-
 void lexer::consume()
 {
-    ++p;
-    if (p >= input.size())
-    {
-        c = EOF;
-    }
-    else
-    {
-        c = input[p];
-    }
+    ++p >= input.size() ? (c = EOF) : (c = input[p]);
 }
 
 bool lexer::isnum(int c)
 {
-    int t = c - '0';
-    if (t >= 0 && t <= 9)
-    {
-        return true;
-    }
-    return false;
+    return (c - '0') >= 0 && (c - '0') <= 9 ? true : false;
 }
 
 
