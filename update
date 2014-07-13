@@ -1,0 +1,3 @@
+ls -l
+cp -u -v E:/Code/jcSQL/jcSQL/*.h .
+cp -u -v E:/Code/jcSQL/jcSQL/*.cpp .

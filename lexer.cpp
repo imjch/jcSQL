@@ -2,15 +2,16 @@
 #include <string>
 #include <stdexcept>
 #include <cctype>
-#include "operation.h"
+
 #include "log.h"
 #include "err_msg_mgr.h"
+#include "cctype"
 
-const std::string lexer::token_names[] = {"N/A",
-    "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
-    "DOUBLEQUOTE", "COMMA", "LBRACKET",
-    "RBRACKET", "ARROW", "NUM",
-    "BASIC_TYPE","OPERATION_TYPE","LOGIC_TYPE" };
+//const std::string lexer::token_names[] = {"N/A",
+//    "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
+//    "DOUBLEQUOTE", "COMMA", "LBRACKET",
+//    "RBRACKET", "ARROW", "NUM",
+//    "BASIC_TYPE","OPERATION_TYPE","LOGIC_TYPE" };
 
 token::token(int type, const char* text) :type(type), text(text)
 {
@@ -22,21 +23,21 @@ token::~token()
 
 }
 
-int token::get_token_type()
+int token::get_token_type() const
 {
     return type;
+}
+std::string token::get_token_text() const
+{
+    return text;
 }
 
 const std::string& token::to_string()
 {
-    text.insert(0, "<'").append("',").append(lexer::get_token_name(type)).push_back('>');
+    text.insert(0, "<'").append("',").append(text).push_back('>');
     return text;
 }
 
-const std::string lexer::get_token_name(int type)
-{
-    return token_names[type];
-}
 
 void lexer::WS()
 {
@@ -50,7 +51,7 @@ std::string lexer::IDENTIFIERS()
     std::string buf;
     do
     {
-        buf.push_back(c);
+        buf.push_back(toupper(c));
         consume();
     } while (isalnum(c));
     return std::string(buf);
@@ -153,32 +154,32 @@ token lexer::next_token()
             else if (c == '=')
             {
                 consume();
-                return token(tag::LOGIC_TYPE, "<=");
+                return token(tag::LEOP, "<=");
             }
             else
             {
-                return token(tag::LOGIC_TYPE, "<");
+                return token(tag::LESSOP, "<");
             }
         case '>':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(tag::LOGIC_TYPE, ">=");
+                return token(tag::MEOP, ">=");
             }
             else
             {
-                return token(tag::LOGIC_TYPE,">");
+                return token(tag::MOREOP,">");
             }
         case '=':
             consume();
-            return token(tag::LOGIC_TYPE, "=");
+            return token(tag::EQOP, "=");
         case '!':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(tag::LOGIC_TYPE,"!=");
+                return token(tag::NEOP,"!=");
             }
             else
             {
@@ -187,12 +188,12 @@ token lexer::next_token()
         default:
             if (isalpha(c))
             {
-                 std::string id=IDENTIFIERS();
-                 if (key_words.contain_key(id))
+                 std::string token_text=IDENTIFIERS();
+                 if (key_words.contain_key(token_text))
                  {
-                     return token(key_words[id],id.c_str());
+                     return token(key_words[token_text], token_text.c_str()); 
                  }
-                 return token(tag::IDENTIFIER,id.c_str());
+                 return token(tag::IDENTIFIER, token_text.c_str());
             }
             if (isnum(c))
             {
@@ -215,15 +216,19 @@ lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0)
     //key_words.add_key_word("<=", tag::LEOP);
     //key_words.add_key_word(">=", tag::MEOP);
     //key_words.add_key_word("!=", tag::NEOP);
-    //key_words.add_key_word("=", tag::EQOP);
-    //key_words.add_key_word("<-", tag::ARROW);
-    key_words.add_key_word("create", tag::OPERATION_TYPE);
-    key_words.add_key_word("drop", tag::OPERATION_TYPE);
-    key_words.add_key_word("alter", tag::OPERATION_TYPE);
-    key_words.add_key_word("insert", tag::OPERATION_TYPE);
-    key_words.add_key_word("int", tag::BASIC_TYPE);
-    key_words.add_key_word("string", tag::BASIC_TYPE);
-    key_words.add_key_word("double", tag::BASIC_TYPE);
+    key_words.add_key_word("OR", tag::OR);
+    key_words.add_key_word("AND", tag::AND);
+    key_words.add_key_word("NOT", tag::NOT);
+    key_words.add_key_word("NULL", tag::JC_NULL);
+    key_words.add_key_word("SELECT", tag::JC_SELECT);
+    key_words.add_key_word("DELETE", tag::JC_DELETE);
+    key_words.add_key_word("CREATE", tag::JC_CREATE);
+    key_words.add_key_word("DROP", tag::JC_DROP);
+    key_words.add_key_word("ALTER", tag::JC_ALTER);
+    key_words.add_key_word("INSERT", tag::JC_INSERT);
+    key_words.add_key_word("INT", tag::BASIC_TYPE);
+    key_words.add_key_word("STRING", tag::BASIC_TYPE);
+    key_words.add_key_word("DOUBLE", tag::BASIC_TYPE);
 }
 
 lexer::~lexer()

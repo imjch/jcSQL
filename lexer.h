@@ -13,17 +13,27 @@ public:
     static const int COMMA = 5;
     static const int LBRACKET = 6;
     static const int RBRACKET = 7;
-    //static const int LESSOP = 8;
-    //static const int MOREOP = 9;
-    //static const int LEOP = 10;
-    //static const int MEOP = 11;
-    //static const int NEOP = 12;
-    //static const int EQOP = 13;
-    static const int ARROW = 8;
-    static const int NUM = 9;
-    static const int BASIC_TYPE = 10;
-    static const int OPERATION_TYPE = 11;
-    static const int LOGIC_TYPE = 12;
+    static const int LESSOP = 8;
+    static const int MOREOP = 9;
+    static const int LEOP = 10;
+    static const int MEOP = 11;
+    static const int NEOP = 12;
+    static const int EQOP = 13;
+    static const int ARROW = 14;
+    static const int NUM = 15;
+    static const int BASIC_TYPE = 16;
+    
+    static const int AND = 17;
+    static const int OR = 18;
+    static const int NOT = 19;
+    static const int JC_NULL = 20;
+
+    static const int JC_SELECT = 100;
+    static const int JC_DELETE = 101;
+    static const int JC_CREATE = 102;
+    static const int JC_DROP = 103;
+    static const int JC_ALTER = 104;
+    static const int JC_INSERT = 105;
 };
 
 class token
@@ -31,7 +41,8 @@ class token
 public:
 	token(int, const char*);
 	~token();
-    int get_token_type();
+    int get_token_type() const;
+    std::string get_token_text() const;
     const std::string& to_string();
 private:
 	int type;
@@ -44,8 +55,6 @@ public:
     lexer(const std::string&);
     ~lexer();
     token next_token();
-
-    static const std::string get_token_name(int type);
 private:
     void consume();
     bool isnum(int);
