@@ -13,21 +13,24 @@ public:
     static const int COMMA = 5;
     static const int LBRACKET = 6;
     static const int RBRACKET = 7;
-    static const int LESSOP = 8;
+   /* static const int LESSOP = 8;
     static const int MOREOP = 9;
     static const int LEOP = 10;
     static const int MEOP = 11;
     static const int NEOP = 12;
-    static const int EQOP = 13;
-    static const int ARROW = 14;
-    static const int NUM = 15;
+    static const int EQOP = 13;*/
+    static const int ARROW = 13;
+    static const int INT = 14;
+    static const int DOUBLE = 15;
     static const int BASIC_TYPE = 16;
-    
     static const int AND = 17;
     static const int OR = 18;
     static const int NOT = 19;
     static const int JC_NULL = 20;
-
+    static const int TABLE = 21;
+    static const int LOGIC_TYPE = 22;
+    static const int ASSIGN = 23;
+    static const int STRING = 24;
     static const int JC_SELECT = 100;
     static const int JC_DELETE = 101;
     static const int JC_CREATE = 102;
@@ -60,9 +63,8 @@ private:
     bool isnum(int);
     void WS();
     std::string IDENTIFIERS();
-    std::string NUMS();
+    token NUMS();
     std::string STRINGS_WITH_TERMINATION(char);
-  
     key_word_table key_words;
     std::string input;
     char c;

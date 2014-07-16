@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    lexer lexer(string("select <- students string name int age [ name != \"aa']"));
+    lexer lexer(string("select <- students  name  age [ name != 'a' and age == 20]"));
     parser parser(lexer);
     parser.program();
     /* token t = lexer.next_token();

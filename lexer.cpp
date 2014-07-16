@@ -7,12 +7,6 @@
 #include "err_msg_mgr.h"
 #include "cctype"
 
-//const std::string lexer::token_names[] = {"N/A",
-//    "<EOF>", "IDENTIFIER", "SINGLEQUOTE",
-//    "DOUBLEQUOTE", "COMMA", "LBRACKET",
-//    "RBRACKET", "ARROW", "NUM",
-//    "BASIC_TYPE","OPERATION_TYPE","LOGIC_TYPE" };
-
 token::token(int type, const char* text) :type(type), text(text)
 {
 
@@ -57,7 +51,7 @@ std::string lexer::IDENTIFIERS()
     return std::string(buf);
 }
 
-std::string lexer::NUMS()
+token lexer::NUMS()
 {
     std::string buf;
     do
@@ -72,8 +66,9 @@ std::string lexer::NUMS()
             buf.push_back(c);
             consume();
         } while (isnum(c));
+        return token(tag::DOUBLE, buf.c_str());
     }
-    return std::string(buf);
+    return token(tag::INT, buf.c_str());
 }
 
 std::string lexer::STRINGS_WITH_TERMINATION(char ch)
@@ -112,7 +107,7 @@ token lexer::next_token()
         else
         {
             std::string id = STRINGS_WITH_TERMINATION(quote_stack.top()).c_str();
-            token tk(tag::BASIC_TYPE, id.c_str());
+            token tk(tag::STRING, id.c_str());
             if (!id.empty())
             {
                 return token(tk);
@@ -154,32 +149,37 @@ token lexer::next_token()
             else if (c == '=')
             {
                 consume();
-                return token(tag::LEOP, "<=");
+                return token(tag::LOGIC_TYPE, "<=");
             }
             else
             {
-                return token(tag::LESSOP, "<");
+                return token(tag::LOGIC_TYPE, "<");
             }
         case '>':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(tag::MEOP, ">=");
+                return token(tag::LOGIC_TYPE, ">=");
             }
             else
             {
-                return token(tag::MOREOP,">");
+                return token(tag::LOGIC_TYPE, ">");
             }
         case '=':
             consume();
-            return token(tag::EQOP, "=");
+            if (c=='=')
+            {
+                consume();
+                return token(tag::LOGIC_TYPE, "==");
+            }
+            return token(tag::ASSIGN, "=");
         case '!':
             consume();
             if (c == '=')
             {
                 consume();
-                return token(tag::NEOP,"!=");
+                return token(tag::LOGIC_TYPE, "!=");
             }
             else
             {
@@ -197,7 +197,7 @@ token lexer::next_token()
             }
             if (isnum(c))
             {
-                 return token(tag::NUM,NUMS().c_str());
+                 return NUMS();
             }
         }
     }
@@ -206,16 +206,7 @@ token lexer::next_token()
 
 lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0)
 {
-    //key_words.add_key_word("'", tag::SINGLEQUOTE);
-    //key_words.add_key_word("\"", tag::DOUBLEQUOTE);
-    //key_words.add_key_word(",", tag::COMMA);
-    //key_words.add_key_word("[", tag::LBRACKET);
-    //key_words.add_key_word("]", tag::RBRACKET);
-    //key_words.add_key_word("<", tag::LESSOP);
-    //key_words.add_key_word(">", tag::MOREOP);
-    //key_words.add_key_word("<=", tag::LEOP);
-    //key_words.add_key_word(">=", tag::MEOP);
-    //key_words.add_key_word("!=", tag::NEOP);
+    key_words.add_key_word("TABLE", tag::TABLE);
     key_words.add_key_word("OR", tag::OR);
     key_words.add_key_word("AND", tag::AND);
     key_words.add_key_word("NOT", tag::NOT);
