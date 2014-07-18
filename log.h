@@ -34,7 +34,7 @@ public:
 
     void clear()
     {
-        file.close();
+        close();
         if (remove(file_path.c_str()) != 0)
         {
             throw std::runtime_error("clear file error...");
@@ -72,10 +72,9 @@ private:
 class log
 {
 public:
-    static void write_with_clear(const char*);
     static void write_append(const char*);
     static void write_line(const char*);
-
+    static void clear();
 private:
     static std::string path;
     static file_manager file;

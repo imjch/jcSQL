@@ -31,6 +31,9 @@ public:
     static const int LOGIC_TYPE = 22;
     static const int ASSIGN = 23;
     static const int STRING = 24;
+    static const int UNIQUE = 25;
+    static const int PRIMARY = 26;
+    static const int KEY = 27;
     static const int JC_SELECT = 100;
     static const int JC_DELETE = 101;
     static const int JC_CREATE = 102;

@@ -6,7 +6,11 @@
 #include "err_msg_mgr.h"
 #include "result_list.h"
 #include "logic_expr.h"
+#include "logic_expr_list.h"
+#include "column_attr_table.h"
+#include "column_attr_pair.h"
 #include "select_operation.h"
+#include "create_operation.h"
 #include <utility>
 parser::parser(lexer& lexer) :input(lexer), lookahead(input.next_token())
 {
@@ -28,38 +32,97 @@ void parser::STMTS()
     case tag::JC_SELECT:
         match(tag::JC_SELECT);
         SELECT();
+        break;
     case tag::JC_ALTER:
-
+        break;
     case tag::JC_CREATE:
-
+        match(tag::JC_CREATE);
+        CREATE();
+        break;
     case tag::JC_DELETE:
-
+        break;
     case tag::JC_DROP:
-
+        break;
     case tag::JC_INSERT:
-
+        break;
     default:
-        log::write_line(err_msg_mgr::invlid_expression("invalid type of operation %s", lookahead.get_token_text()).c_str());
+        log::write_line(err_msg_mgr::invlid_expression("invalid type of operation %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 
-void parser::SELECT()
+select_operation parser::SELECT()
 {
     match(tag::ARROW);
     select_operation select;
-    select.add_table_name(TABLE_NAME());
+    select.set_table_name(TABLE_NAME());
     if (lookahead.get_token_type() == tag::IDENTIFIER)
     {
         select.add_cols(COLUMNS());
     }
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        select.add_table(SELECTORS());
+        select.add_logic_table(SELECTORS());
     }
-    else
+    return select;
+}
+
+create_operation parser::CREATE()
+{
+    match(tag::ARROW);
+    create_operation create;
+    create.set_table_name(TABLE_NAME());
+    create.set_type_column_table(TYPE_COLUMN_PAIRS());
+    if (lookahead.get_token_type()==tag::LBRACKET)
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s", lookahead.get_token_text()).c_str());
+        SET_GLOBAL_COLUMN_ATTR_TABLE();
     }
+    return create;
+}
+column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
+{
+    std::string col = COLUMN();
+    switch (lookahead.get_token_type())
+    {
+    case tag::NOT:
+        match(tag::NOT);
+        if (lookahead.get_token_type()==tag::JC_NULL)
+        {
+            match(tag::JC_NULL);
+            return column_attr_pair(col,NOT_NULL);
+        }
+        else
+        {
+            goto error;
+        }
+    case tag::PRIMARY:
+        match(tag::PRIMARY);
+        if (lookahead.get_token_type()==tag::KEY)
+        {
+            match(tag::KEY);
+            return column_attr_pair(col, PRIMARY_KEY);
+        }
+        else
+        {
+            goto error;
+        }
+        break;
+    case tag::UNIQUE:
+        match(tag::UNIQUE);
+        return column_attr_pair(col, UNIQUE);
+    error:
+        log::write_line(err_msg_mgr::invlid_expression("invalid column attribution: %s", lookahead.get_token_text().c_str()).c_str());
+    }
+}
+void parser::SET_GLOBAL_COLUMN_ATTR_TABLE()
+{
+    match(tag::LBRACKET);
+    column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
+    while (lookahead.get_token_type()!=tag::RBRACKET)
+    {
+        match(tag::COMMA);
+        column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
+    }
+    match(tag::RBRACKET);
 }
 
 std::string parser::TABLE_NAME()
@@ -71,7 +134,12 @@ std::string parser::COLUMN()
 {
     return IDENTIFIER();
 }
-
+std::string parser::TYPE()
+{
+    std::string type = VALUE();
+    match(tag::BASIC_TYPE);
+    return type;
+}
 std::string parser::IDENTIFIER()
 {
     std::string id = VALUE();
@@ -116,10 +184,28 @@ void parser::ATTR_VAL_PAIR()
 
 }
 
+type_column_pair parser::TYPE_COLUMN_PAIR()
+{
+    std::string type = TYPE();
+    std::string col = COLUMN();
+    return type_column_pair(type, col);
+}
+
+type_column_table parser::TYPE_COLUMN_PAIRS()
+{
+    type_column_table table;
+    table.add_type_column(TYPE_COLUMN_PAIR());
+    while (lookahead.get_token_type()==tag::BASIC_TYPE)
+    {
+        table.add_type_column(TYPE_COLUMN_PAIR());
+    }
+    return table;
+}
+
 std::string parser::GET_STRING_WITH_QUOTE()
 {
     std::string str;
-    if (lookahead.get_token_type()==tag::SINGLEQUOTE)
+    if (lookahead.get_token_type() == tag::SINGLEQUOTE)
     {
         match(tag::SINGLEQUOTE);
         str = VALUE();
@@ -231,7 +317,7 @@ void parser::match(int x)
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s",lookahead.get_token_text()).c_str());
+        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 void parser::move()

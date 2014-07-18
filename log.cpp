@@ -10,14 +10,6 @@ std::string file_manager::get_current_directory()
     return std::string(buffer);
 }
 
-
-void log::write_with_clear(const char* content)
-{
-    file.clear();
-    file.write(std::string(content));
-    file.close();
-}
-
 void log::write_append(const char* content)
 {
     file.open(path);
@@ -31,5 +23,12 @@ void log::write_line(const char* content)
     str.append("\n");
     file.open(path);
     file.write(str);
+    file.close();
+}
+
+void log::clear()
+{
+    file.open(path);
+    file.clear();
     file.close();
 }

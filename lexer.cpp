@@ -206,6 +206,9 @@ token lexer::next_token()
 
 lexer::lexer(const std::string& input = "") :input(input), c(input[0]), p(0)
 {
+    key_words.add_key_word("PRIMARY", tag::PRIMARY);
+    key_words.add_key_word("KEY", tag::KEY);
+    key_words.add_key_word("UNIQUE", tag::UNIQUE);
     key_words.add_key_word("TABLE", tag::TABLE);
     key_words.add_key_word("OR", tag::OR);
     key_words.add_key_word("AND", tag::AND);

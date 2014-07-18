@@ -10,20 +10,15 @@ logic_expr::logic_expr(const std::string& attr, const std::string& op, result_li
 
 }
 
-//logic_expr::logic_expr()
-//{
-//
-//}
-
 logic_expr::~logic_expr()
 {
 }
 
-void logic_expr::add_attr(const std::string& attr)
+void logic_expr::set_attr(const std::string& attr)
 {
     attr_name = attr;
 }
-void logic_expr::add_op(const std::string& op)
+void logic_expr::set_op(const std::string& op)
 {
     this->op = op;
 }

@@ -3,20 +3,15 @@
 #include "lexer.h"
 #include "parser.h"
 #include <string>
-#include <memory>
+#include "log.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-    lexer lexer(string("select <- students  name  age [ name != 'a' and age == 20]"));
+    log::clear();
+    lexer lexer(string("create <- student string name int age [name primary key,age not null]"));
     parser parser(lexer);
     parser.program();
-    /* token t = lexer.next_token();
-     while (t.get_token_type()!=tag::EOF_TYPE)
-     {
-     cout << t.to_string() << endl;
-     t = lexer.next_token();
-     }*/
     cout << "success..." << endl;
     getchar();
 }
