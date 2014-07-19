@@ -31,53 +31,103 @@ void parser::STMTS()
     {
     case tag::JC_SELECT:
         match(tag::JC_SELECT);
-        SELECT();
+        JC_SELECT();
         break;
     case tag::JC_ALTER:
         break;
     case tag::JC_CREATE:
         match(tag::JC_CREATE);
-        CREATE();
+        JC_CREATE();
         break;
     case tag::JC_DELETE:
+        match(tag::JC_DELETE);
+        JC_DELETE();
         break;
     case tag::JC_DROP:
+        match(tag::JC_DROP);
+        JC_DROP();
         break;
     case tag::JC_INSERT:
+        match(tag::JC_INSERT);
+        JC_INSERT();
         break;
     default:
         log::write_line(err_msg_mgr::invlid_expression("invalid type of operation %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 
-select_operation parser::SELECT()
+void parser::VERIFY_END()
+{
+    if (lookahead.get_token_type() != tag::EOF_TYPE)
+    {
+        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s", lookahead.get_token_text().c_str()).c_str());
+    }
+}
+
+select_operation parser::JC_SELECT()
 {
     match(tag::ARROW);
     select_operation select;
-    select.set_table_name(TABLE_NAME());
+    std::string table_name=TABLE_NAME();
+    std::list<std::string> list;
+    logic_conn_table table;
     if (lookahead.get_token_type() == tag::IDENTIFIER)
     {
-        select.add_cols(COLUMNS());
+        list=COLUMNS();
     }
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        select.add_logic_table(SELECTORS());
+        table=SELECTORS();
     }
-    return select;
+    VERIFY_END();
+    return select_operation(table_name, list, table);
 }
 
-create_operation parser::CREATE()
+create_operation parser::JC_CREATE()
 {
     match(tag::ARROW);
-    create_operation create;
-    create.set_table_name(TABLE_NAME());
-    create.set_type_column_table(TYPE_COLUMN_PAIRS());
+    std::string table_name =TABLE_NAME();
+    type_column_table t_c_table=TYPE_COLUMN_PAIRS();
     if (lookahead.get_token_type()==tag::LBRACKET)
     {
         SET_GLOBAL_COLUMN_ATTR_TABLE();
     }
-    return create;
+    VERIFY_END();
+    return create_operation(table_name,t_c_table);
 }
+
+drop_operation parser::JC_DROP()
+{
+    match(tag::ARROW);
+    std::string t_name = TABLE_NAME();
+    VERIFY_END();
+    return drop_operation(t_name);
+}
+
+delete_operation parser::JC_DELETE()
+{
+    match(tag::ARROW);
+    std::string table_name = TABLE_NAME();
+    logic_conn_table table;
+    if (lookahead.get_token_type()==tag::LBRACKET)
+    {
+        table = SELECTORS();
+    }
+    VERIFY_END();
+    return delete_operation(table_name, table);
+}
+insert_operation parser::JC_INSERT()
+{
+    match(tag::ARROW);
+    std::string table_name = TABLE_NAME();
+    attr_val_list list;
+    if (lookahead.get_token_type() != tag::EOF_TYPE)
+    {
+        list=(ATTR_VAL_PAIRS());
+    }
+    return insert_operation(table_name,list);
+}
+
 column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
 {
     std::string col = COLUMN();
@@ -164,24 +214,57 @@ std::string parser::OP()
     return val;
 }
 
-result_list parser::COLUMNS()
+std::list<std::string> parser::COLUMNS()
 {
-    result_list cols;
+    std::list<std::string> cols;
     while (lookahead.get_token_type() == tag::IDENTIFIER)
     {
-        cols.add(COLUMN());
+        cols.push_back(COLUMN());
     }
     return cols;
 }
 
-void parser::ATTR_VAL_PAIRS()
+attr_val_list parser::ATTR_VAL_PAIRS()
 {
-
+    attr_val_list list;
+    while (lookahead.get_token_type()==tag::IDENTIFIER)
+    {
+        list.add_attr_val(ATTR_VAL_PAIR());
+    }
+    return list;
 }
 
-void parser::ATTR_VAL_PAIR()
+attr_val_pair parser::ATTR_VAL_PAIR()
 {
-
+    std::string attr_name = ATTR_NAME();
+    match(tag::ASSIGN);
+    result_list list;
+    std::string val;
+    if (lookahead.get_token_type() == tag::SINGLEQUOTE ||
+        lookahead.get_token_type() == tag::DOUBLEQUOTE)
+    {
+        val = GET_STRING_WITH_QUOTE();
+        list.add(val);
+        return attr_val_pair(attr_name,list, JC_STRING);
+    }
+    else if (lookahead.get_token_type()==tag::DOUBLE)
+    {
+        val = VALUE();
+        match(tag::DOUBLE);
+        list.add(val);
+        return attr_val_pair(attr_name, list, JC_DOUBLE);
+    }
+    else if (lookahead.get_token_type() == tag::INT)
+    {
+        val = VALUE();
+        match(tag::INT);
+        list.add(val);
+        return attr_val_pair(attr_name, list, JC_INT);
+    }
+    else
+    {
+        log::write_line(err_msg_mgr::invlid_expression("expecting the valid rvalue").c_str());
+    }
 }
 
 type_column_pair parser::TYPE_COLUMN_PAIR()
@@ -220,7 +303,7 @@ std::string parser::GET_STRING_WITH_QUOTE()
         match(tag::DOUBLEQUOTE);
     }
     return str;
-}
+} 
 
 logic_expr parser::LOGIC_EXPR_PAIR()
 {
@@ -255,15 +338,21 @@ logic_expr parser::LOGIC_EXPR_PAIR()
     }
 }
 
+//this method need refactoring...:p
 logic_conn_table parser::LOGIC_EXPR_PAIRS()
 {
     logic_conn_table table;
     logic_expr_list and_list;
     logic_expr_list or_list;
-    table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
-    table.add_logic_conn_list(std::make_pair(std::string("OR"), or_list));
     logic_expr expr = LOGIC_EXPR_PAIR();
 
+    if (lookahead.get_token_type()!=tag::IDENTIFIER)
+    {
+        and_list.add_logic_expr(expr);
+        table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
+        table.add_logic_conn_list(std::make_pair(std::string("OR"), or_list));
+        return table;
+    }
     switch (lookahead.get_token_type())
     {
     case tag::AND:
@@ -290,6 +379,8 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
             log::write_line(err_msg_mgr::invlid_expression("expecting the valid logic connector : and / or ?").c_str());
         }
     }
+    table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
+    table.add_logic_conn_list(std::make_pair(std::string("OR"), or_list));
     return table;
 }
 
@@ -304,6 +395,7 @@ logic_conn_table parser::SELECTORS()
     else
     {
         log::write_line(err_msg_mgr::invlid_expression("expecting the logic expression").c_str());
+        move();
     }
     match(tag::RBRACKET);
     return table;
@@ -317,7 +409,8 @@ void parser::match(int x)
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s", lookahead.get_token_text().c_str()).c_str());
+        log::write_line(err_msg_mgr::invlid_expression("invalid identifier: %s", lookahead.get_token_text().c_str()).c_str());
+        move();
     }
 }
 void parser::move()

@@ -1,11 +1,9 @@
 #include "lexer.h"
 #include <string>
-#include <stdexcept>
 #include <cctype>
-
 #include "log.h"
 #include "err_msg_mgr.h"
-#include "cctype"
+#include <regex>
 
 token::token(int type, const char* text) :type(type), text(text)
 {
@@ -58,17 +56,23 @@ token lexer::NUMS()
     {
         buf.push_back(c);
         consume();
-    } while (isnum(c));
-    if (c == '.')
+    } while (c!=' ');
+    //verify:is a number or not!it is not necessary to put this piece of 
+    //code into the other methods.
+    std::regex e("^\\d+(.\\d+)?$");
+    if (std::regex_match(buf,e))
     {
-        do
+        if (buf.find_first_of('.')==std::string::npos)
         {
-            buf.push_back(c);
-            consume();
-        } while (isnum(c));
+            return token(tag::INT, buf.c_str());
+        }
         return token(tag::DOUBLE, buf.c_str());
     }
-    return token(tag::INT, buf.c_str());
+    else
+    {
+        log::write_line(err_msg_mgr::invlid_expression("invalid number token %s",buf.c_str()).c_str());
+        return token(tag::INVALID, buf.c_str());
+    }
 }
 
 std::string lexer::STRINGS_WITH_TERMINATION(char ch)
@@ -184,6 +188,7 @@ token lexer::next_token()
             else
             {
                 log::write_line(err_msg_mgr::invlid_expression("invalid token !%c", c).c_str());
+                return token(tag::INVALID,std::string("!").append(&c).c_str());
             }
         default:
             if (isalpha(c))

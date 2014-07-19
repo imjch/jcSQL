@@ -6,6 +6,7 @@
 class tag
 {
 public:
+    static const int INVALID = 0;
     static const int EOF_TYPE = 1;
     static const int IDENTIFIER = 2;
     static const int SINGLEQUOTE = 3;

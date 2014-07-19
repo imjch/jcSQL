@@ -1,8 +1,14 @@
 #include "create_operation.h"
-
+#include <string>
 
 create_operation::create_operation()
 {
+}
+
+create_operation::create_operation(const std::string& t_name, type_column_table& t):
+table(t)
+{
+    operation::set_table_name(t_name);   
 }
 
 create_operation::~create_operation()
