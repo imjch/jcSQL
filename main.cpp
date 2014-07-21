@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     log::clear();
-    lexer lexer(string("delete <- student [name = \"jiang chuan\"] "));
+    lexer lexer(string("alter <- - string name int age "));
     parser parser(lexer);
     parser.program();
     cout << "success..." << endl;

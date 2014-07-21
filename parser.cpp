@@ -12,6 +12,8 @@
 #include "select_operation.h"
 #include "create_operation.h"
 #include <utility>
+#include "alter_operation.h"
+#include "operators.h"
 parser::parser(lexer& lexer) :input(lexer), lookahead(input.next_token())
 {
 }
@@ -34,6 +36,8 @@ void parser::STMTS()
         JC_SELECT();
         break;
     case tag::JC_ALTER:
+        match(tag::JC_ALTER);
+        JC_ALTER();
         break;
     case tag::JC_CREATE:
         match(tag::JC_CREATE);
@@ -52,7 +56,7 @@ void parser::STMTS()
         JC_INSERT();
         break;
     default:
-        log::write_line(err_msg_mgr::invlid_expression("invalid type of operation %s", lookahead.get_token_text().c_str()).c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid type of operation %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 
@@ -60,7 +64,7 @@ void parser::VERIFY_END()
 {
     if (lookahead.get_token_type() != tag::EOF_TYPE)
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid identifier %s", lookahead.get_token_text().c_str()).c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid identifier %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 
@@ -68,16 +72,16 @@ select_operation parser::JC_SELECT()
 {
     match(tag::ARROW);
     select_operation select;
-    std::string table_name=TABLE_NAME();
+    std::string table_name = TABLE_NAME();
     std::list<std::string> list;
     logic_conn_table table;
     if (lookahead.get_token_type() == tag::IDENTIFIER)
     {
-        list=COLUMNS();
+        list = COLUMNS();
     }
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        table=SELECTORS();
+        table = SELECTORS();
     }
     VERIFY_END();
     return select_operation(table_name, list, table);
@@ -86,14 +90,14 @@ select_operation parser::JC_SELECT()
 create_operation parser::JC_CREATE()
 {
     match(tag::ARROW);
-    std::string table_name =TABLE_NAME();
-    type_column_table t_c_table=TYPE_COLUMN_PAIRS();
-    if (lookahead.get_token_type()==tag::LBRACKET)
+    std::string table_name = TABLE_NAME();
+    type_column_table t_c_table = TYPE_COLUMN_PAIRS();
+    if (lookahead.get_token_type() == tag::LBRACKET)
     {
         SET_GLOBAL_COLUMN_ATTR_TABLE();
     }
     VERIFY_END();
-    return create_operation(table_name,t_c_table);
+    return create_operation(table_name, t_c_table);
 }
 
 drop_operation parser::JC_DROP()
@@ -104,12 +108,39 @@ drop_operation parser::JC_DROP()
     return drop_operation(t_name);
 }
 
+alter_operation parser::JC_ALTER()
+{
+    match(tag::ARROW);
+    operators op;
+    switch (lookahead.get_token_type())
+    {
+    case tag::ADD:
+        op = ADD;
+        match(tag::ADD);
+        break;
+    case tag::SUB:
+        match(tag::SUB);
+        op = SUB;
+        break;
+    case tag::SLASH:
+        match(tag::SLASH);
+        op = SLASH;
+        break;
+    default:
+        move();
+        log::write_line(err_msg_mgr::invalid_expression("invalid operator type %s",lookahead.get_token_text().c_str()).c_str());
+    }
+    type_column_table table = TYPE_COLUMN_PAIRS();
+    VERIFY_END();
+    return alter_operation(op, table);
+}
+
 delete_operation parser::JC_DELETE()
 {
     match(tag::ARROW);
     std::string table_name = TABLE_NAME();
     logic_conn_table table;
-    if (lookahead.get_token_type()==tag::LBRACKET)
+    if (lookahead.get_token_type() == tag::LBRACKET)
     {
         table = SELECTORS();
     }
@@ -123,9 +154,9 @@ insert_operation parser::JC_INSERT()
     attr_val_list list;
     if (lookahead.get_token_type() != tag::EOF_TYPE)
     {
-        list=(ATTR_VAL_PAIRS());
+        list = (ATTR_VAL_PAIRS());
     }
-    return insert_operation(table_name,list);
+    return insert_operation(table_name, list);
 }
 
 column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
@@ -135,10 +166,10 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
     {
     case tag::NOT:
         match(tag::NOT);
-        if (lookahead.get_token_type()==tag::JC_NULL)
+        if (lookahead.get_token_type() == tag::JC_NULL)
         {
             match(tag::JC_NULL);
-            return column_attr_pair(col,NOT_NULL);
+            return column_attr_pair(col, NOT_NULL);
         }
         else
         {
@@ -146,7 +177,7 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         }
     case tag::PRIMARY:
         match(tag::PRIMARY);
-        if (lookahead.get_token_type()==tag::KEY)
+        if (lookahead.get_token_type() == tag::KEY)
         {
             match(tag::KEY);
             return column_attr_pair(col, PRIMARY_KEY);
@@ -160,14 +191,14 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         match(tag::UNIQUE);
         return column_attr_pair(col, UNIQUE);
     error:
-        log::write_line(err_msg_mgr::invlid_expression("invalid column attribution: %s", lookahead.get_token_text().c_str()).c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid column attribution: %s", lookahead.get_token_text().c_str()).c_str());
     }
 }
 void parser::SET_GLOBAL_COLUMN_ATTR_TABLE()
 {
     match(tag::LBRACKET);
     column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
-    while (lookahead.get_token_type()!=tag::RBRACKET)
+    while (lookahead.get_token_type() != tag::RBRACKET)
     {
         match(tag::COMMA);
         column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
@@ -227,7 +258,7 @@ std::list<std::string> parser::COLUMNS()
 attr_val_list parser::ATTR_VAL_PAIRS()
 {
     attr_val_list list;
-    while (lookahead.get_token_type()==tag::IDENTIFIER)
+    while (lookahead.get_token_type() == tag::IDENTIFIER)
     {
         list.add_attr_val(ATTR_VAL_PAIR());
     }
@@ -245,9 +276,9 @@ attr_val_pair parser::ATTR_VAL_PAIR()
     {
         val = GET_STRING_WITH_QUOTE();
         list.add(val);
-        return attr_val_pair(attr_name,list, JC_STRING);
+        return attr_val_pair(attr_name, list, JC_STRING);
     }
-    else if (lookahead.get_token_type()==tag::DOUBLE)
+    else if (lookahead.get_token_type() == tag::DOUBLE)
     {
         val = VALUE();
         match(tag::DOUBLE);
@@ -263,7 +294,7 @@ attr_val_pair parser::ATTR_VAL_PAIR()
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("expecting the valid rvalue").c_str());
+        log::write_line(err_msg_mgr::invalid_expression("expecting the valid rvalue").c_str());
     }
 }
 
@@ -278,7 +309,7 @@ type_column_table parser::TYPE_COLUMN_PAIRS()
 {
     type_column_table table;
     table.add_type_column(TYPE_COLUMN_PAIR());
-    while (lookahead.get_token_type()==tag::BASIC_TYPE)
+    while (lookahead.get_token_type() == tag::BASIC_TYPE)
     {
         table.add_type_column(TYPE_COLUMN_PAIR());
     }
@@ -303,7 +334,7 @@ std::string parser::GET_STRING_WITH_QUOTE()
         match(tag::DOUBLEQUOTE);
     }
     return str;
-} 
+}
 
 logic_expr parser::LOGIC_EXPR_PAIR()
 {
@@ -311,14 +342,14 @@ logic_expr parser::LOGIC_EXPR_PAIR()
     std::string op = OP();
     std::string val;
     result_list list;
-    if (lookahead.get_token_type() == tag::SINGLEQUOTE||
+    if (lookahead.get_token_type() == tag::SINGLEQUOTE ||
         lookahead.get_token_type() == tag::DOUBLEQUOTE)
     {
         val = GET_STRING_WITH_QUOTE();
         list.add(val);
         return logic_expr(attr_name, op, list, JC_STRING);
     }
-    else if (lookahead.get_token_type()==tag::INT)
+    else if (lookahead.get_token_type() == tag::INT)
     {
         val = VALUE();
         match(tag::INT);
@@ -334,7 +365,7 @@ logic_expr parser::LOGIC_EXPR_PAIR()
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("expecting the valid rvalue").c_str());
+        log::write_line(err_msg_mgr::invalid_expression("expecting the valid rvalue").c_str());
     }
 }
 
@@ -346,7 +377,7 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
     logic_expr_list or_list;
     logic_expr expr = LOGIC_EXPR_PAIR();
 
-    if (lookahead.get_token_type()!=tag::IDENTIFIER)
+    if (lookahead.get_token_type() != tag::IDENTIFIER)
     {
         and_list.add_logic_expr(expr);
         table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
@@ -376,7 +407,7 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
             or_list.add_logic_expr(LOGIC_EXPR_PAIR());
             break;
         default:
-            log::write_line(err_msg_mgr::invlid_expression("expecting the valid logic connector : and / or ?").c_str());
+            log::write_line(err_msg_mgr::invalid_expression("expecting the valid logic connector : and / or ?").c_str());
         }
     }
     table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
@@ -394,7 +425,7 @@ logic_conn_table parser::SELECTORS()
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("expecting the logic expression").c_str());
+        log::write_line(err_msg_mgr::invalid_expression("expecting the logic expression").c_str());
         move();
     }
     match(tag::RBRACKET);
@@ -409,7 +440,7 @@ void parser::match(int x)
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid identifier: %s", lookahead.get_token_text().c_str()).c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid identifier: %s", lookahead.get_token_text().c_str()).c_str());
         move();
     }
 }

@@ -5,7 +5,7 @@
 class err_msg_mgr
 {
 public:
-    static std::string invlid_expression(const char *format,...)
+    static std::string invalid_expression(const char *format,...)
     {
         char buff[BUFSIZ];
         std::string msg("error:");

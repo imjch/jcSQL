@@ -13,6 +13,7 @@
 #include "drop_operation.h"
 #include "insert_operation.h"
 #include "delete_operation.h"
+#include "alter_operation.h"
 #include <utility>
 class parser
 {
@@ -50,6 +51,7 @@ private:
     select_operation JC_SELECT();
     create_operation JC_CREATE();
     insert_operation JC_INSERT();
+    alter_operation JC_ALTER();
     lexer input;
     token lookahead;
 };

@@ -4,27 +4,34 @@ This project is a simple implementation of a executable engine of SQL which matc
 
 ###jcSQL's first stage of the representation :###
 
-> select <- table_name column_names [column_name OP 'XXX' and column_name OP XXX or column_name OP {S}] 
-  
-> create <- table table_name type column_name type column_name  [ column_name not null , column_name primary key ] 
-	    | database db_name ...
+> select <- student name age 
+> =>select name,age from student> 
+>
+> select <- student
+> =>select * from student> 
+>
+> update <- student name='xxx' [age == 10] 
+> =>update student set name = 'xxx' where age = 10> 
+>
+> delete <- student [ name == 'xxx']
+> =>delete from student where name = 'xxx' > 
+>
+> create <- student string name int age [ name primary key]
+> =>create table student (name string,age int,primary key(name))> 
+>
+> insert into student (name,age) values('xxx',10)
+> =>insert <- student name='xxx' age=xxx > 
+>
+> drop <- student
+> =>drop table student> 
+>
+> alter table student add dept string
+> =>alter<- student + string dept> 
+>
+> alter table student drop column dept
+> =>alter<- student - string dept> 
+>
+> alter table student alter column dept int
+> =>alter<- student / int dept
 
-> insert <- table_name column_name='XXX' column_name=XXX ...
-
-> update <- table_name column_name='XXX' column_name=XXX ... [column_name OP 'XXX' and/, column_name OP XXX or column_name OP {S}]
-
-> delete <- table_name [column_name OP 'XXX' and column_name OP XXX or column_name OP {S}] 
-
-> drop <- table table_name | database db_name
-
-> alter <-  table_name type column_name  type column_name
-
-> alter <-  table_name column_name column_name
-
-> alter <-  table_name column_name type
-
-> OP-> == != < > <= >= ...
-
-Actually,it is incomplete and needs improving,;p
-
-Well...maybe the grammar will be altered gradually during the development process of the compiler.  
+Well...this toy is incomplete and needs other key words,;p,maybe the grammar will be altered gradually during the development process of the compiler.  

@@ -35,6 +35,12 @@ public:
     static const int UNIQUE = 25;
     static const int PRIMARY = 26;
     static const int KEY = 27;
+
+    static const int ADD = 28;
+    static const int SUB = 29;
+    static const int TIMES = 30;
+    static const int SLASH = 31;
+
     static const int JC_SELECT = 100;
     static const int JC_DELETE = 101;
     static const int JC_CREATE = 102;

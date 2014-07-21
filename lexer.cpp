@@ -70,7 +70,7 @@ token lexer::NUMS()
     }
     else
     {
-        log::write_line(err_msg_mgr::invlid_expression("invalid number token %s",buf.c_str()).c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid number token %s",buf.c_str()).c_str());
         return token(tag::INVALID, buf.c_str());
     }
 }
@@ -126,6 +126,17 @@ token lexer::next_token()
         case ' ':case '\t':case '\n':case '\r':
             WS();
             continue;
+        case '+':
+            consume();
+            return token(tag::ADD, "+");
+        case '-':
+            consume();
+            return token(tag::SUB, "-");
+        case '*':
+            return token(tag::TIMES, "*");
+        case '/':
+            consume();
+            return token(tag::SLASH, "/");
         case ',':
             consume();
             return token(tag::COMMA, ",");
@@ -187,7 +198,7 @@ token lexer::next_token()
             }
             else
             {
-                log::write_line(err_msg_mgr::invlid_expression("invalid token !%c", c).c_str());
+                log::write_line(err_msg_mgr::invalid_expression("invalid token !%c", c).c_str());
                 return token(tag::INVALID,std::string("!").append(&c).c_str());
             }
         default:
