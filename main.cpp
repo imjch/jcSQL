@@ -9,9 +9,16 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     log::clear();
-    lexer lexer(string("alter <- - string name int age "));
+    lexer lexer(string("select <- student name [sdfsasd af "));
     parser parser(lexer);
     parser.program();
-    cout << "success..." << endl;
+    if (log::empty())
+    {
+        cout << "success..." << endl;
+    }
+    else
+    {
+        log::foreach();
+    }
     getchar();
 }

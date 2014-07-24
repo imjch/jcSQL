@@ -10,6 +10,7 @@ op(op)
 }
 logic_expr::logic_expr()
 {
+    
 }
 logic_expr::~logic_expr()
 {

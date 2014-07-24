@@ -9,10 +9,9 @@ public:
     {
         char buff[BUFSIZ];
         std::string msg("error:");
-
-        va_list args;
-        _crt_va_start(args, format);
-        vsnprintf_s(buff, BUFSIZ, format,args);
+        va_list list;
+        va_start(list, format);
+        vsnprintf_s(buff, BUFSIZ, format, list);
         msg.append(buff);
         return std::string(msg);
     }

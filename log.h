@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <Windows.h>
-
+#include "err_counter.h"
 
 class file_manager
 {
@@ -75,7 +75,9 @@ public:
     static void write_append(const char*);
     static void write_line(const char*);
     static void clear();
+    static bool empty();
+    static void foreach();
 private:
     static std::string path;
-    static file_manager file;
+    static err_counter counter;
 };

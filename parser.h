@@ -22,7 +22,7 @@ public:
     ~parser();
     void program();
 private:
-    void STMTS();
+    operation* STMTS();
     std::string GET_STRING_WITH_QUOTE();
     std::pair<int, std::string> REAL_VALUE();
     std::string OP();
@@ -43,15 +43,16 @@ private:
     std::string TYPE();
     std::string IDENTIFIER();
     void match(int);
+    void match(int, char* format, ...);
     void move();
     void VERIFY_END();
 
-    drop_operation JC_DROP();
-    delete_operation JC_DELETE();
-    select_operation JC_SELECT();
-    create_operation JC_CREATE();
-    insert_operation JC_INSERT();
-    alter_operation JC_ALTER();
+    drop_operation* JC_DROP();
+    delete_operation* JC_DELETE();
+    select_operation* JC_SELECT();
+    create_operation* JC_CREATE();
+    insert_operation* JC_INSERT();
+    alter_operation* JC_ALTER();
     lexer input;
     token lookahead;
 };

@@ -24,3 +24,8 @@ void select_operation::set_logic_table(logic_conn_table& t)
     l_table = t;
 }
 
+result_list select_operation::execute()
+{
+    return result_list("sss");
+}
+
