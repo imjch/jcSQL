@@ -3,6 +3,7 @@
 #include <list>
 #include "logic_conn_table.h"
 #include "operation.h"
+
 class select_operation:public operation
 {
 public:
@@ -14,7 +15,7 @@ public:
     void add_cols(input_iterator begin, input_iterator end);
     void add_cols(result_list&);
     void set_logic_table(logic_conn_table&);
-    result_list select_operation::execute();
+   
 private:
     std::list<std::string> cols;
     logic_conn_table l_table;

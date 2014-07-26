@@ -22,7 +22,7 @@ void delete_operation::set_table_name(const std::string& t_name)
     operation::set_table_name(t_name);
 }
 
-result_list delete_operation::execute()
-{
-    return result_list("sss"); 
-}
+//result_list delete_operation::execute()
+//{
+//    return result_list("sss"); 
+//}

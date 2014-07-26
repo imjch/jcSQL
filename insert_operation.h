@@ -9,7 +9,7 @@ public:
     insert_operation();
     ~insert_operation();
     void set_attr_val_list(attr_val_list&);
-    result_list insert_operation::execute();
+    //result_list insert_operation::execute();
 private:
     attr_val_list list;
 };

@@ -20,7 +20,7 @@ class parser
 public:
     parser(lexer&);
     ~parser();
-    void program();
+    operation* program();
 private:
     operation* STMTS();
     std::string GET_STRING_WITH_QUOTE();

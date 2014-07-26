@@ -7,6 +7,6 @@ public:
     drop_operation();
     drop_operation(const std::string&);
     ~drop_operation();
-    result_list drop_operation::execute();
+    //result_list drop_operation::execute();
 };
 

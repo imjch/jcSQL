@@ -22,9 +22,9 @@ parser::~parser()
 {
 }
 
-void parser::program()
+operation* parser::program()
 {
-    operation* operation = STMTS();
+    return STMTS();
 }
 
 operation* parser::STMTS()
@@ -191,8 +191,11 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
     case tag::UNIQUE:
         match(tag::UNIQUE);
         return column_attr_pair(col, UNIQUE);
+    default:
     error:
         log::write_line(err_msg_mgr::invalid_expression("invalid column attribution: %s", lookahead.get_token_text().c_str()).c_str());
+        move();
+        return column_attr_pair(col,INVALID);
     }
 }
 void parser::SET_GLOBAL_COLUMN_ATTR_TABLE()
@@ -214,7 +217,9 @@ std::string parser::TABLE_NAME()
 
 std::string parser::COLUMN()
 {
-    return IDENTIFIER();
+    std::string id = VALUE();
+    match(tag::IDENTIFIER,"invalid column name %s,expecting valid column name",lookahead.get_token_text().c_str());
+    return id;
 }
 std::string parser::TYPE()
 {
@@ -295,7 +300,7 @@ attr_val_pair parser::ATTR_VAL_PAIR()
     }
     else
     {
-        log::write_line(err_msg_mgr::invalid_expression("expecting the valid rvalue").c_str());
+        log::write_line(err_msg_mgr::invalid_expression("invalid rvalue %s , expecting the valid rvalue",lookahead.get_token_text().c_str()).c_str());
     }
 }
 

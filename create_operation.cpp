@@ -20,8 +20,8 @@ void create_operation::set_type_column_table(type_column_table& t)
 {
     table = t;
 }
-result_list create_operation::execute()
-{
-    return result_list("sss");
-}
-
+//result_list create_operation::execute()
+//{
+//    return result_list("sss");
+//}
+//

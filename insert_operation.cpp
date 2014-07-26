@@ -21,7 +21,7 @@ void insert_operation::set_attr_val_list(attr_val_list& l)
     list = l;
 }
 
-result_list insert_operation::execute()
-{
-    return result_list("sss");
-}
+//result_list insert_operation::execute()
+//{
+//    return result_list("sss");
+//}
