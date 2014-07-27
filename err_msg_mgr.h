@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdio>
-#include <vadefs.h>
+#include <stdarg.h>
 class err_msg_mgr
 {
 public:

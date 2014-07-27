@@ -4,15 +4,15 @@
 #include "parser.h"
 #include "executor.h"
 #include <string>
-#include "log.h"
+#include <iterator>
+#include "err_collector.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-    log::clear();
     lexer lexer(string("create <- student string name [ name primary key]"));
     parser parser(lexer);
-    if (log::empty())
+    if (err_collector::empty())
     {
         try
         {
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        log::foreach();
+        err_collector::output_error(std::ostream_iterator<std::string>(cout,"\n"));
     }
     getchar();
 }

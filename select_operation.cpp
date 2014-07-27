@@ -4,6 +4,7 @@ select_operation::select_operation()
 {
     
 }
+
 select_operation::select_operation(const std::string& t_n, std::list<std::string>& l, logic_conn_table& t)
 :cols(l), l_table(t)
 {

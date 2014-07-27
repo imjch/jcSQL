@@ -1,6 +1,7 @@
 #pragma once
 #include "lexer.h"
 #include <vector>
+#include "err_collector.h"
 #include "logic_expr.h"
 #include "logic_expr_list.h"
 #include "logic_conn_table.h"

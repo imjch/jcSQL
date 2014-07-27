@@ -1,7 +1,7 @@
 #include "logic_expr.h"
 
 
-logic_expr::logic_expr(const std::string& attr, const std::string& op, result_list& list, val_type v_t):
+logic_expr::logic_expr(const std::string& attr, const std::string& op, result_list& list, val_type v_t) :
 op(op)
 {
     avp.set_attr(attr);

@@ -6,7 +6,7 @@
 class logic_expr
 {
 public:
-    logic_expr(const std::string&, const std::string& ,result_list&,val_type);
+    logic_expr(const std::string&, const std::string&, result_list&, val_type);
     logic_expr();
     ~logic_expr();
     void set_attr(const std::string&);

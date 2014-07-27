@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include <string>
 #include <cctype>
-#include "log.h"
+#include "err_collector.h"
 #include "err_msg_mgr.h"
 #include <regex>
 
@@ -70,7 +70,7 @@ token lexer::NUMS()
     }
     else
     {
-        log::write_line(err_msg_mgr::invalid_expression("invalid number token %s",buf.c_str()).c_str());
+        err_collector::add_error(err_msg_mgr::invalid_expression("invalid number token %s",buf.c_str()).c_str());
         return token(tag::INVALID, buf.c_str());
     }
 }
@@ -198,7 +198,7 @@ token lexer::next_token()
             }
             else
             {
-                log::write_line(err_msg_mgr::invalid_expression("invalid token !%c", c).c_str());
+                err_collector::add_error(err_msg_mgr::invalid_expression("invalid token !%c", c).c_str());
                 return token(tag::INVALID,std::string("!").append(&c).c_str());
             }
         default:

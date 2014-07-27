@@ -9,44 +9,18 @@
 #include "insert_operation.h"
 #include <stdexcept>
 
-void executor(operation* o)
-{
-
-    if (auto op = dynamic_cast<select_operation*>(o))
-    {
-        
-    }
-    else if (auto op = dynamic_cast<delete_operation*>(o))
-    {
-
-    }
-    else if (auto op = dynamic_cast<create_operation*>(o))
-    {
-
-    }
-    else if (auto op = dynamic_cast<drop_operation*>(o))
-    {
-
-    }
-    else if (auto op = dynamic_cast<alter_operation*>(o))
-    {
-
-    }
-    else if (auto op = dynamic_cast<insert_operation*>(o))
-    {
-
-    }
-    else
-    {
-        throw std::bad_cast("invalid type of operation");
-    }
-}
+void executor(operation* o);
 
 class evaluator
 {
 public:
     evaluator();
     ~evaluator();
-    result_list execute(operation*, select_operation);
+    result_list execute_select(select_operation*);
+    result_list execute_delete(delete_operation*);
+    result_list execute_create(create_operation*);
+    result_list execute_drop(drop_operation*);
+    result_list execute_alter(alter_operation*);
+    result_list execute_insert(insert_operation*);
 };
 
