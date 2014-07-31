@@ -7,6 +7,8 @@
 #include "drop_operation.h"
 #include "alter_operation.h"
 #include "insert_operation.h"
+#include "table_mgr.h"
+#include "db_mgr.h"
 #include <stdexcept>
 
 void executor(operation* o);
@@ -16,11 +18,14 @@ class evaluator
 public:
     evaluator();
     ~evaluator();
-    result_list execute_select(select_operation*);
-    result_list execute_delete(delete_operation*);
-    result_list execute_create(create_operation*);
-    result_list execute_drop(drop_operation*);
-    result_list execute_alter(alter_operation*);
-    result_list execute_insert(insert_operation*);
+    void execute_select(select_operation*);
+    void execute_delete(delete_operation*);
+    void execute_create(create_operation*);
+    void execute_drop(drop_operation*);
+    void execute_alter(alter_operation*);
+    void execute_insert(insert_operation*);
+private:
+    table_mgr t_mgr;
+    db_mgr d_mgr;
 };
 

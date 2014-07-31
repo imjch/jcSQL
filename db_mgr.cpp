@@ -1,9 +1,11 @@
 #include "db_mgr.h"
 #include <string>
-#include <direct.h>
-#include <Windows.h>
-
-db_mgr::db_mgr() :default_dir(dir_mgr::get_current_directory())
+#include <cassert>
+#include <stdexcept>
+#include "err_msg_mgr.h"
+#include <iostream>
+std::string db_mgr::default_db(dir_mgr::get_current_directory()+"\\jcsql");
+db_mgr::db_mgr()
 {
 }
 
@@ -11,49 +13,57 @@ db_mgr::~db_mgr()
 {
 }
 
-std::string db_mgr::to_dir(const std::string& db_name)
-{
-    return default_dir +"/" + db_name;
-}
-
 void db_mgr::create_database(const std::string& db_name)
 {
-    if (d_mgr.exist(to_dir(db_name)))
+    assert(db_name.size()>0);
+    if (dir_mgr::exist(get_current_database()))
     {
-        throw std::runtime_error("database exists.");
+        throw std::runtime_error(err_msg_mgr::invalid_expression("database '%s' has already existed",db_name.c_str()));
     }
     try
     {
-        d_mgr.create_directory(to_dir(db_name));
+        dir_mgr::create_directory(get_current_database());
     }
-    catch (...)
+    catch (std::runtime_error& e)
     {
-        throw;
+        std::cerr << e.what() << std::endl;
     }
 }
 
 
 void db_mgr::delete_database(const std::string& db_name)
 {
-    if (!d_mgr.exist(to_dir(db_name)))
+    assert(db_name.size()>0);
+    if (!dir_mgr::exist(get_current_database()))
     {
-        throw std::runtime_error("database non-exists.");
+        throw std::runtime_error(err_msg_mgr::invalid_expression("database '%s' non-exists", db_name.c_str()));
     }
     try
     {
-        d_mgr.remove_dir(to_dir(db_name));
+        dir_mgr::remove_dir(get_current_database());
     }
-    catch (...)
+    catch (std::runtime_error& e)
     {
-        throw;
+        std::cerr << e.what() << std::endl;
     }
 }
 
 bool db_mgr::exist(const std::string& db_name)
 {
-    if (d_mgr.exist(to_dir(db_name)))
+    assert(db_name.size()>0);
+    if (dir_mgr::exist(get_current_database()))
     {
         return true;
     }
     return false;
+}
+
+void db_mgr::set_current_database(const std::string& db_path)
+{
+    default_db = dir_mgr::get_current_directory().append("\\").append(db_path);
+}
+
+const std::string& db_mgr::get_current_database()
+{
+    return default_db;
 }

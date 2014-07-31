@@ -9,13 +9,13 @@ class db_mgr:private uncopyable
 public:
     db_mgr();
     ~db_mgr();
-    void create_database(const std::string&);
-    void delete_database(const std::string&);
-    bool exist(const std::string&);
+    static void create_database(const std::string&);
+    static void delete_database(const std::string&);
+    static void set_current_database(const std::string&);
+    static const std::string& get_current_database();
+    static bool exist(const std::string&);
 private:
-    std::string to_dir(const std::string& db_name);
-    std::string default_dir;
-    dir_mgr d_mgr;
+    static std::string default_db;
 };
 
 

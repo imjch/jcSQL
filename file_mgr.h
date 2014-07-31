@@ -5,17 +5,21 @@
 class file_mgr:private uncopyable
 {
 public:
-    file_mgr();
+    file_mgr(const std::string&, const char*);
     ~file_mgr();
-    void open(const std::string&);
-    bool exist(const std::string&);
-    void clear();
-    void close();
+    file_mgr();
+    void clear_content();
+    std::string read();
     void write(const std::string&);
-    void create_file(const std::string&);
+    void append(const std::string&);
+    static void create_file(const std::string&);
+    static void remove_file(const std::string&);
+    static bool exist(const std::string&);
+    void close();
+    void open(const std::string&, const char * fmode);
 private:
-    void is_success();
-    std::fstream file;
+
+    FILE* fp;
     std::string file_path;
 };
 

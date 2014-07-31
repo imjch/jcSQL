@@ -1,94 +1,118 @@
 #include "file_mgr.h"
 #include "err_msg_mgr.h"
 #include <Shlwapi.h>
-
-file_mgr::file_mgr()
-{
-}
+#include <cassert>
+#include <cstdio>
 
 file_mgr::~file_mgr()
 {
+   
+} 
+file_mgr::file_mgr()
+{
+
+}
+void file_mgr::close()
+{
+    if (fp >= NULL)
+    {
+        ::fclose(fp);
+    }
+}
+
+file_mgr::file_mgr(const std::string& file_name, const char* fmode)
+{
+    open(file_name,fmode);
 }
 
 bool file_mgr::exist(const std::string& path)
 {
-    if (PathFileExistsA(path.c_str()))
+    assert(path.size()>0);
+    GetFileAttributesA(path.c_str()); // from winbase.h
+    if (INVALID_FILE_ATTRIBUTES == GetFileAttributesA(path.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)
     {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
-void file_mgr::open(const std::string& path)
+void file_mgr::open(const std::string& path,const char * fmode)
 {
+    assert(path.c_str()>0);
+    assert(fmode!=NULL);
     file_path = path;
-    if (!exist(path))
+    fp = ::fopen(path.c_str(),fmode);
+    if (!fp)
     {
-        throw std::runtime_error("file non-exist");
-    }
-    if (!file.is_open())
-    {
-        try
-        {
-            file.open(path, std::fstream::in | std::fstream::out | std::fstream::app);
-            is_success();
-        }
-        catch (...)
-        {
-            throw;
-        }
+        perror(err_msg_mgr::invalid_expression("open file %s failed",path.c_str()).c_str());
     }
 }
 
-void file_mgr::clear()
+void file_mgr::clear_content()
 {
-    if (!file_path.empty())
-    {
-        close();
-        if (remove(file_path.c_str()) != 0)
-        {
-            throw std::runtime_error("clear file error");
-        }
-        create_file(file_path);
-    }
+    remove_file(file_path);
+    create_file(file_path);
 }
 
-void file_mgr::close()
+void file_mgr::append(const std::string& content)
 {
-    if (file.is_open())
+    if (fseek(fp, 0, SEEK_END))
     {
-        file.close();
+        perror("error occured in file_mgr::append()");
+        ::abort();
     }
+    write(content);
 }
 
 void file_mgr::write(const std::string& content)
 {
-    if (!file_path.empty())
+    rewind(fp);
+    if (::fputs(content.c_str(), fp)<0)
     {
-        try
+        perror("writing data failed");
+        ::abort();
+    }
+}
+
+void file_mgr::create_file(const std::string& path)
+{
+    assert(path.size()>0);
+    FILE * f;
+    if (exist(path))
+    {
+        remove_file(path);
+    }
+    if ((f=fopen(path.c_str(), "w")) == NULL)
+    {
+        perror("creating file failed");
+    }
+    fclose(f);
+}
+
+void file_mgr::remove_file(const std::string& path)
+{
+    assert(path.size()>0);
+    if (exist(path))
+    {
+        if (remove(path.c_str())!=0)
         {
-            file.write(content.c_str(), content.size());
-        }
-        catch (...)
-        {
-            throw;
+            perror("removing file %s failed");
         }
     }
 }
 
-void file_mgr::is_success()
+std::string file_mgr::read()
 {
-    if (!file)
+    char buf[4096];
+    std::string content;
+    while (fgets(buf,4096,fp)!=NULL)
     {
-        throw std::runtime_error(err_msg_mgr::invalid_expression("unable to open the file %s",file_path.c_str()).c_str());
+        content.append(buf);
     }
-} 
-
-void file_mgr::create_file(const std::string& path)
-{
-    if (!exist(path))
+    if (ferror(fp))
     {
-        std::ofstream fs(path.c_str());
-        is_success();
+        perror("reading data failed");
+        ::abort();
     }
+    return content;
 }

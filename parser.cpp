@@ -7,7 +7,7 @@
 #include "result_list.h"
 #include "logic_expr.h"
 #include "logic_expr_list.h"
-#include "column_attr_table.h"
+#include "table_attr.h"
 #include "column_attr_pair.h"
 #include "select_operation.h"
 #include "create_operation.h"
@@ -95,7 +95,7 @@ create_operation* parser::JC_CREATE()
     type_column_table t_c_table = TYPE_COLUMN_PAIRS();
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        SET_GLOBAL_COLUMN_ATTR_TABLE();
+        SET_GLOBAL_TABLE_ATTR();
     }
     VERIFY_END();
     return new create_operation(table_name, t_c_table);
@@ -198,14 +198,14 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         return column_attr_pair(col, COLUMN_ATTR_INVALID);
     }
 }
-void parser::SET_GLOBAL_COLUMN_ATTR_TABLE()
+void parser::SET_GLOBAL_TABLE_ATTR()
 {
     match(tag::LBRACKET);
-    column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
+    table_attr::add_column_attr(GET_COLUMN_ATTR_PAIR());
     while (lookahead.get_token_type() != tag::RBRACKET)
     {
         match(tag::COMMA);
-        column_attr_table::add_column_attr(GET_COLUMN_ATTR_PAIR());
+        table_attr::add_column_attr(GET_COLUMN_ATTR_PAIR());
     }
     match(tag::RBRACKET);
 }

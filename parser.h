@@ -7,7 +7,7 @@
 #include "logic_conn_table.h"
 #include "type_column_pair.h"
 #include "type_column_table.h"
-#include "column_attr_table.h"
+#include "table_attr.h"
 #include "column_attr_pair.h"
 #include "select_operation.h"
 #include "create_operation.h"
@@ -29,7 +29,7 @@ private:
     std::string OP();
     std::list<std::string> COLUMNS();
     column_attr_pair GET_COLUMN_ATTR_PAIR();
-    void SET_GLOBAL_COLUMN_ATTR_TABLE();
+    void SET_GLOBAL_TABLE_ATTR();
     logic_conn_table SELECTORS();
     type_column_pair TYPE_COLUMN_PAIR();
     type_column_table TYPE_COLUMN_PAIRS();
