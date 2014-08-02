@@ -12,9 +12,12 @@ public:
     void set_val_type(val_type);
     void add_val(const std::string&);
     void set_result_list(const result_list&);
+    std::string get_attr_name();
+    val_type get_val_type();
+    result_list get_result_list();
 private:
     std::string attr_name;
-    val_type v_t;
     result_list result;
+    val_type v_t;
 };
 

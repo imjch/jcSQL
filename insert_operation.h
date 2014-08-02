@@ -9,6 +9,8 @@ public:
     insert_operation();
     ~insert_operation();
     void set_attr_val_list(attr_val_list&);
+    void add_attr_val_pair(attr_val_pair&);
+    attr_val_list get_attr_val_list();
     //result_list insert_operation::execute();
 private:
     attr_val_list list;

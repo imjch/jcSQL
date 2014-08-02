@@ -1,5 +1,5 @@
 #include "result_list.h"
-
+#include <cassert>
 
 result_list::result_list()
 {
@@ -27,5 +27,10 @@ result_list::result_list_iterator result_list::begin()
 result_list::result_list_iterator result_list::end()
 {
     return items.end();
+}
+
+size_t result_list::size()
+{
+    return items.size();
 }
 

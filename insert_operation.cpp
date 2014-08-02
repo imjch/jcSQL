@@ -16,12 +16,17 @@ insert_operation::~insert_operation()
     operation::~operation();
 }
 
-void insert_operation::set_attr_val_list(attr_val_list& l)
+void insert_operation::set_attr_val_list(attr_val_list& li)
 {
-    list = l;
+    list = li;
 }
 
-//result_list insert_operation::execute()
-//{
-//    return result_list("sss");
-//}
+void insert_operation::add_attr_val_pair(attr_val_pair& pair)
+{
+    list.add_attr_val(pair);
+}
+
+attr_val_list insert_operation::get_attr_val_list()
+{
+    return list;
+}

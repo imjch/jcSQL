@@ -32,3 +32,19 @@ void attr_val_pair::set_result_list(const result_list& list)
 {
     result = list;
 }
+
+std::string attr_val_pair::get_attr_name()
+{
+    return attr_name;
+}
+
+val_type attr_val_pair::get_val_type()
+{
+    return v_t;
+}
+
+result_list attr_val_pair::get_result_list()
+{
+    return result;
+}
+

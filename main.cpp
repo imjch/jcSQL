@@ -11,16 +11,16 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    lexer lexer(string("create <- student string name int age [ name primary key,name primary key,age unique,age primary key]"));
+    lexer lexer(string("create <- student string name int age [name primary key,age unique,age not null]"));
     parser parser(lexer);
+    operation* o = parser.program();
+    shared_ptr<operation> op(o);
     if (err_collector::empty())
     {
         try
         {
-            operation* o = parser.program();
-            executor(o);
-            delete o;
-            cout << "success..." << endl;
+            executor(op.get());
+            cout << "Done..." << endl;
         }
         catch (std::runtime_error& e)
         {

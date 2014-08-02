@@ -1,6 +1,5 @@
 #include "table_attr.h"
-
-table_attr::a_c_table table_attr::table;
+#include <utility>
 
 table_attr::table_attr()
 {
@@ -12,19 +11,17 @@ table_attr::~table_attr()
 
 void table_attr::add_column_attr(column_attr_pair& pair)
 {
-    add_column_attr(pair.get_column_name(),pair.get_attr());
+    table[pair.get_attr()].push_back(pair);
 }
 
-void table_attr::add_column_attr(const std::string& col, column_attr attr)
+table_attr::column_attr_list table_attr::get_column_attr(column_attr attr)
 {
-    table[attr].push_back(col);
+    return table[attr];
 }
-table_attr::column_list table_attr::get_column_list(column_attr attr)
+
+size_t table_attr::size()
 {
-    if (table.count(attr)>0)
-    {
-        return table[attr];
-    }
+    return table.size();
 }
 
 table_attr::iterator table_attr::begin()
@@ -36,7 +33,4 @@ table_attr::iterator table_attr::end()
 {
     return table.end();
 }
-
-
-
 

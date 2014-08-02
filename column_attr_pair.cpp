@@ -1,8 +1,11 @@
 #include "column_attr_pair.h"
 
 
-column_attr_pair::column_attr_pair(const std::string& col,column_attr val)
+column_attr_pair::column_attr_pair(column_attr val, const std::string& col)
 :column_name(col), attr(val)
+{
+}
+column_attr_pair::column_attr_pair()
 {
 }
 

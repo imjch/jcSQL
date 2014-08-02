@@ -93,12 +93,13 @@ create_operation* parser::JC_CREATE()
     match(tag::ARROW);
     std::string table_name = TABLE_NAME();
     type_column_table t_c_table = TYPE_COLUMN_PAIRS();
+    table_attr t_attr;
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        SET_GLOBAL_TABLE_ATTR();
+        t_attr= SET_TABLE_ATTR();
     }
     VERIFY_END();
-    return new create_operation(table_name, t_c_table);
+    return new create_operation(table_name, t_c_table, t_attr);
 }
 
 drop_operation* parser::JC_DROP()
@@ -157,6 +158,7 @@ insert_operation* parser::JC_INSERT()
     {
         list = (ATTR_VAL_PAIRS());
     }
+    VERIFY_END();
     return new insert_operation(table_name, list);
 }
 
@@ -170,7 +172,7 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         if (lookahead.get_token_type() == tag::JC_NULL)
         {
             match(tag::JC_NULL);
-            return column_attr_pair(col, NOT_NULL);
+            return column_attr_pair(NOT_NULL,col);
         }
         else
         {
@@ -181,7 +183,7 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         if (lookahead.get_token_type() == tag::KEY)
         {
             match(tag::KEY);
-            return column_attr_pair(col, PRIMARY_KEY);
+            return column_attr_pair(PRIMARY_KEY,col);
         }
         else
         {
@@ -190,24 +192,26 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         break;
     case tag::UNIQUE:
         match(tag::UNIQUE);
-        return column_attr_pair(col, UNIQUE);
+        return column_attr_pair(UNIQUE,col );
     default:
     error:
         err_collector::add_error(err_msg_mgr::invalid_expression("invalid column attribution: %s", lookahead.get_token_text().c_str()));
         move();
-        return column_attr_pair(col, COLUMN_ATTR_INVALID);
+        return column_attr_pair(COLUMN_ATTR_INVALID,col );
     }
 }
-void parser::SET_GLOBAL_TABLE_ATTR()
+table_attr parser::SET_TABLE_ATTR()
 {
     match(tag::LBRACKET);
-    table_attr::add_column_attr(GET_COLUMN_ATTR_PAIR());
-    while (lookahead.get_token_type() != tag::RBRACKET)
+    table_attr table_attrs;
+    table_attrs.add_column_attr(GET_COLUMN_ATTR_PAIR());
+    while (lookahead.get_token_type() != tag::RBRACKET&&lookahead.get_token_type()!=tag::EOF_TYPE)
     {
         match(tag::COMMA);
-        table_attr::add_column_attr(GET_COLUMN_ATTR_PAIR());
+        table_attrs.add_column_attr(GET_COLUMN_ATTR_PAIR());
     }
     match(tag::RBRACKET);
+    return table_attrs;
 }
 
 std::string parser::TABLE_NAME()

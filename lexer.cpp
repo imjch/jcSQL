@@ -56,7 +56,7 @@ token lexer::NUMS()
     {
         buf.push_back(c);
         consume();
-    } while (c!=' ');
+    } while (c!=' '&&c!=EOF);
     //verify:is a number or not!it is not necessary to put this piece of 
     //code into the other methods.
     std::regex e("^\\d+(.\\d+)?$");

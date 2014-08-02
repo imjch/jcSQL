@@ -9,6 +9,8 @@ public:
     result_list();
     ~result_list();
     void add(const std::string&);
+
+    size_t size();
     result_list_iterator begin();
     result_list_iterator end();
 private:
