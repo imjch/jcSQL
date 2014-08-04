@@ -10,7 +10,9 @@ public:
     logic_expr();
     ~logic_expr();
     void set_attr(const std::string&);
+    std::string get_attr();
     void set_op(const std::string&);
+    std::string get_op();
     void add_val(const std::string&);
     void set_val_type(val_type v);
 private:

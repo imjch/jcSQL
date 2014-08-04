@@ -23,7 +23,14 @@ void alter_operation::add_typ_column(type_column_pair& pair)
 {
     columns_list.second.add_type_column(pair);
 }
-//result_list alter_operation::execute()
-//{
-//    return result_list("sss");
-//}
+
+operators alter_operation::get_op()
+{
+    return columns_list.first;
+}
+
+type_column_table alter_operation::get_type_column_table()
+{
+    return columns_list.second;
+}
+

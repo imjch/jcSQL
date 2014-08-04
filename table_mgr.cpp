@@ -54,7 +54,6 @@ void table_mgr::create_table(const std::string& table_name)
 void table_mgr::delete_table(const std::string& table_name)
 {
     assert(table_name.size()>0);
-
     std::string full_path(db_mgr::get_current_database() + "\\" + table_name);
     file_mgr::remove_file(full_path);
     file_mgr::remove_file(full_path + ".attr");
@@ -90,27 +89,23 @@ void table_mgr::set_table_type_columns(type_column_table& t_c_table)
 {
     file_mgr f;
     f.open(get_full_table_attr_path(), "r+");
-    std::string content = f.read();
-    Json::Reader reader;
-    Json::Value object;
+    Json::Value root;
     Json::StyledWriter writer;
-    reader.parse(content.c_str(), object);
+    root = fetch_all_data();
     for (auto iter = t_c_table.begin(); iter != t_c_table.end(); ++iter)
     {
-        object[iter->get_column()] = iter->get_type();
+        root[iter->get_column()] = iter->get_type();
     }
-    f.write(writer.write(object));
+    f.write(writer.write(root));
 }
 
 void table_mgr::set_table_attrs(table_attr& attrs)
 {
     file_mgr f;
     f.open(get_full_table_attr_path(), "r+");
-    std::string content = f.read();
-    Json::Reader reader;
-    Json::Value object;
+    Json::Value root;
     Json::StyledWriter writer;
-    reader.parse(content.c_str(), object);
+    root = fetch_all_data();
 
     if (attrs.size()>0)
     {
@@ -118,14 +113,14 @@ void table_mgr::set_table_attrs(table_attr& attrs)
         {
             for (auto iiter = iter->second.begin(); iiter != iter->second.end(); iiter++)
             {
-                if (!contain_attr(object[column_attrs[iiter->get_attr()]], iiter->get_column_name()))
+                if (!contain_attr(root[column_attrs[iiter->get_attr()]], iiter->get_column_name()))
                 {
-                    object[column_attrs[iiter->get_attr()]].append(iiter->get_column_name());
+                    root[column_attrs[iiter->get_attr()]].append(iiter->get_column_name());
                 }
             }
         }
     }
-    f.write(writer.write(object));
+    f.write(writer.write(root));
     f.close();
 }
 
@@ -137,12 +132,8 @@ bool table_mgr::exist(const std::string& table_name)
 void table_mgr::insert_data(attr_val_list& list)
 {
     attr_val_list::iterator iter = list.begin();
-    Json::Reader reader;
     Json::FastWriter writer;
-    Json::Value root;
-    std::string content = f_mgr.read();
-
-    reader.parse(content, root);
+    Json::Value root=fetch_all_data();
     while (iter!=list.end())
     {
         insert_data_(root, iter->second);
@@ -151,8 +142,33 @@ void table_mgr::insert_data(attr_val_list& list)
     f_mgr.write(writer.write(root));
 }
 
+//void table_mgr::alter_table(operators op, type_column_table& t_c_table)
+//{
+//    assert(op >= 0);
+//    assert(t_c_table.size()>0);
+//
+//}
+
+table_mgr::result_table table_mgr::get_data(column_list& li, logic_conn_table& l_c_table)
+{
+    //todo
+}
+
 void table_mgr::insert_data_(Json::Value& root, attr_val_pair& pair)
 {
-    assert(pair.get_result_list().size()==1);
+    assert(!root.isNull());
+    assert(pair.get_result_list().size() == 1);
     root[pair.get_attr_name()].append(*pair.get_result_list().begin());
 }
+
+Json::Value table_mgr::fetch_all_data()
+{
+    Json::Reader reader;
+    Json::FastWriter writer;
+    Json::Value root;
+    std::string content = f_mgr.read();
+    reader.parse(content, root);
+    return content;
+}
+
+

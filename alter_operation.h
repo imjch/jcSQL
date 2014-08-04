@@ -13,7 +13,8 @@ public:
     ~alter_operation();
     void set_op(operators op);
     void add_typ_column(type_column_pair& pair);
-   /* result_list alter_operation::execute();*/
+    type_column_table get_type_column_table();
+    operators get_op();
 private:
     std::pair<operators,type_column_table> columns_list;
 };

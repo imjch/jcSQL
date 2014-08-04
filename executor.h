@@ -18,6 +18,7 @@ class evaluator
 public:
     evaluator();
     ~evaluator();
+
     void execute_select(select_operation*);
     void execute_delete(delete_operation*);
     void execute_create(create_operation*);
@@ -25,6 +26,8 @@ public:
     void execute_alter(alter_operation*);
     void execute_insert(insert_operation*);
 private:
+    void table_exist();
+
     table_mgr t_mgr;
     db_mgr d_mgr;
 };

@@ -5,6 +5,7 @@
 #include "table_attr.h"
 #include <cstdio>
 #include <iostream>
+
 void executor(operation* o)
 {
     evaluator eval;
@@ -48,12 +49,21 @@ evaluator::~evaluator()
 
 void evaluator::execute_select(select_operation* o)
 {
-    
+    if (!table_mgr::exist(o->get_table_name()))
+    {
+        fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
+        return;
+    }
+
 }
 
 void evaluator::execute_delete(delete_operation* o)
 {
-
+    if (!table_mgr::exist(o->get_table_name()))
+    {
+        fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
+        return;
+    }
 }
 
 void evaluator::execute_create(create_operation* o)
@@ -72,12 +82,23 @@ void evaluator::execute_create(create_operation* o)
 
 void evaluator::execute_drop(drop_operation* o)
 {
-
+    if (!table_mgr::exist(o->get_table_name()))
+    {
+        fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
+        return;
+    }
+    t_mgr.delete_table(o->get_table_name());
 }
 
 void evaluator::execute_alter(alter_operation* o)
 {
-
+    if (!table_mgr::exist(o->get_table_name()))
+    {
+        fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
+        return;
+    }
+    /*t_mgr.open_table(o->get_table_name());
+    */
 }
 
 void evaluator::execute_insert(insert_operation* o)
