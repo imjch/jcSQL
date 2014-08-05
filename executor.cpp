@@ -4,6 +4,7 @@
 #include "err_msg_mgr.h"
 #include "table_attr.h"
 #include <cstdio>
+#include "table_mgr.h"
 #include <iostream>
 
 void executor(operation* o)
@@ -54,7 +55,6 @@ void evaluator::execute_select(select_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
-
 }
 
 void evaluator::execute_delete(delete_operation* o)

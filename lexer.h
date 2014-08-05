@@ -14,12 +14,6 @@ public:
     static const int COMMA = 5;
     static const int LBRACKET = 6;
     static const int RBRACKET = 7;
-   /* static const int LESSOP = 8;
-    static const int MOREOP = 9;
-    static const int LEOP = 10;
-    static const int MEOP = 11;
-    static const int NEOP = 12;
-    static const int EQOP = 13;*/
     static const int ARROW = 13;
     static const int INT = 14;
     static const int DOUBLE = 15;

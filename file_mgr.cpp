@@ -41,6 +41,7 @@ void file_mgr::open(const std::string& path,const char * fmode)
     assert(path.c_str()>0);
     assert(fmode!=NULL);
     file_path = path;
+    open_mode = fmode;
     fp = ::fopen(path.c_str(),fmode);
     if (!fp)
     {
@@ -66,7 +67,10 @@ void file_mgr::append(const std::string& content)
 
 void file_mgr::write(const std::string& content)
 {
-    rewind(fp);
+    close();
+    remove_file(file_path);
+    create_file(file_path);
+    open(file_path, open_mode.c_str());
     if (::fputs(content.c_str(), fp)<0)
     {
         perror("writing data failed");

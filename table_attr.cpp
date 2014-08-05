@@ -11,10 +11,10 @@ table_attr::~table_attr()
 
 void table_attr::add_column_attr(column_attr_pair& pair)
 {
-    table[pair.get_attr()].push_back(pair);
+    table[pair.get_attr()].add_column_pair(pair);
 }
 
-table_attr::column_attr_list table_attr::get_column_attr(column_attr attr)
+column_attr_list table_attr::get_column_attr(column_attr attr)
 {
     return table[attr];
 }

@@ -29,7 +29,7 @@ private:
     std::string OP();
     std::list<std::string> COLUMNS();
     column_attr_pair GET_COLUMN_ATTR_PAIR();
-    table_attr SET_TABLE_ATTR();
+    table_attr GET_TABLE_ATTR();
     logic_conn_table SELECTORS();
     type_column_pair TYPE_COLUMN_PAIR();
     type_column_table TYPE_COLUMN_PAIRS();

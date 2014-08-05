@@ -18,7 +18,7 @@ class evaluator
 public:
     evaluator();
     ~evaluator();
-
+    void init_table_attr(operation*);
     void execute_select(select_operation*);
     void execute_delete(delete_operation*);
     void execute_create(create_operation*);

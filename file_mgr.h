@@ -21,5 +21,6 @@ private:
 
     FILE* fp;
     std::string file_path;
+    std::string open_mode;
 };
 

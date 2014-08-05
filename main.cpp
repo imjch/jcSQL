@@ -11,7 +11,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    lexer lexer(string("create <- student string name int age [name primary key,age unique,age not null]"));
+    //create <- student string name int age [name primary key,age not null]
+    //insert <- student name = \"jiang chuan\" age=10
+    lexer lexer(string("insert <- student name = \"jiang chuan\" age=10"));
     parser parser(lexer);
     operation* o = parser.program();
     shared_ptr<operation> op(o);

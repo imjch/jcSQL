@@ -96,10 +96,10 @@ create_operation* parser::JC_CREATE()
     table_attr t_attr;
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
-        t_attr= SET_TABLE_ATTR();
+        t_attr=GET_TABLE_ATTR();
     }
     VERIFY_END();
-    return new create_operation(table_name, t_c_table, t_attr);
+    return new create_operation(table_name, t_c_table,t_attr);
 }
 
 drop_operation* parser::JC_DROP()
@@ -200,18 +200,18 @@ column_attr_pair parser::GET_COLUMN_ATTR_PAIR()
         return column_attr_pair(COLUMN_ATTR_INVALID,col );
     }
 }
-table_attr parser::SET_TABLE_ATTR()
+table_attr parser::GET_TABLE_ATTR()
 {
     match(tag::LBRACKET);
-    table_attr table_attrs;
-    table_attrs.add_column_attr(GET_COLUMN_ATTR_PAIR());
+    table_attr t_attr;
+    t_attr.add_column_attr(GET_COLUMN_ATTR_PAIR());
     while (lookahead.get_token_type() != tag::RBRACKET&&lookahead.get_token_type()!=tag::EOF_TYPE)
     {
         match(tag::COMMA);
-        table_attrs.add_column_attr(GET_COLUMN_ATTR_PAIR());
+        t_attr.add_column_attr(GET_COLUMN_ATTR_PAIR());
     }
     match(tag::RBRACKET);
-    return table_attrs;
+    return t_attr;
 }
 
 std::string parser::TABLE_NAME()
@@ -314,7 +314,7 @@ type_column_pair parser::TYPE_COLUMN_PAIR()
 {
     std::string type = TYPE();
     std::string col = COLUMN();
-    return type_column_pair(type, col);
+    return type_column_pair(val_type_to_i.at(type), col);
 }
 
 type_column_table parser::TYPE_COLUMN_PAIRS()
