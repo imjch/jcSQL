@@ -1,5 +1,5 @@
 #include "type_column_list.h"
-#include "column_attr.h"
+#include "val_type.h"
 type_column_list::type_column_list()
 {
 }
@@ -10,17 +10,18 @@ type_column_list::~type_column_list()
 
 void type_column_list::add_type_column(type_column_pair& pair)
 {
-    items.insert(pair);
+    alter_column_type(pair);
 }
 
 void type_column_list::add_type_column(iterator& begin, iterator& end)
 {
-    items.insert(begin,end);
+    alter_column_type(begin, end);
 }
 
-void type_column_list::alter_column(type_column_pair& pair)
+void type_column_list::alter_column_type(type_column_pair& pair)
 {
-    items.find(pair)->set_type(PRIMARY_KEY);
+    items.erase(pair);
+    items.insert(pair);
 }
 
 size_t type_column_list::size()
@@ -51,4 +52,9 @@ void type_column_list::remove_type_column(type_column_pair& pair)
 void type_column_list::remove_type_column(iterator& begin,iterator& end)
 {
     items.erase(begin,end);
+}
+
+void type_column_list::alter_column_type(iterator& begin, iterator& end)
+{
+    add_type_column(begin, end);
 }

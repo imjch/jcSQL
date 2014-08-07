@@ -8,6 +8,7 @@ public:
     column_attr_list();
     ~column_attr_list();
     void add_column_pair(column_attr_pair&);
+    void alter_column_pair(column_attr_pair&);
     iterator begin();
     iterator end();
     size_t size();

@@ -174,7 +174,7 @@ table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr
             throw std::runtime_error(err_msg_mgr::invalid_expression("column %s non-exists,please check it again.",iter->first));
         }
         record[iter->first].first=READLVAL;
-        record[iter->first].second=*(iter->second.get_result_list().begin());
+        record[iter->first].second=iter->second.get_result_list()[0];
     }
     return record;
 }
@@ -212,15 +212,8 @@ void table_mgr::remove_column(type_column_list& t_c_list)
 void table_mgr::alter_column(type_column_list& t_c_list)
 {
     assert(!t_c_list.empty());
-    current_type_column_list.remove_type_column(t_c_list.begin(), t_c_list.end());
+    current_type_column_list.alter_column_type(t_c_list.begin(), t_c_list.end());
 }
-
-//table_mgr::result_table table_mgr::get_data(column_list& li, logic_conn_table& l_c_table)
-//{
-//  /*  auto l_list=l_c_table.get_logic_expr_list("and");
-//    Json::Value root = fetch_all_data();*/
-//    return result_table();
-//}
 
 Json::Value table_mgr::fetch_all_data(file_mgr& file)
 {

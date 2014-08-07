@@ -11,8 +11,9 @@ public:
     void add_type_column(type_column_pair&);
     void add_type_column(iterator&, iterator&);
     void remove_type_column(type_column_pair&);
-    void alter_column(type_column_pair& pair);
     void type_column_list::remove_type_column(iterator& begin, iterator& end);
+    void alter_column_type(type_column_pair& pair);
+    void alter_column_type(iterator&, iterator&);
     size_t size();
     iterator begin();
     iterator end();

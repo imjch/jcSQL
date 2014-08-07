@@ -19,7 +19,7 @@ void type_column_pair::set_column(const std::string& col_name)
     column_name = col_name;
 }
 
-val_type type_column_pair::get_type() const
+val_type type_column_pair::get_type()
 {
     return type;
 }

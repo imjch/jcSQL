@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <list>
+#include <map>
 #include "file_mgr.h"
 #include "db_mgr.h"
 #include "uncopyable.h"
@@ -42,7 +43,7 @@ public:
 private:
     typedef std::string column_name;
     typedef std::string column_val;
-    typedef std::unordered_map<column_name, std::pair<int, column_val>> data_record_indicator;
+    typedef std::map<column_name, std::pair<int, column_val>> data_record_indicator;
     void set_current_table(const std::string&);
     void get_table_attr();
     std::string get_full_table_path(const std::string& db, const std::string& table);

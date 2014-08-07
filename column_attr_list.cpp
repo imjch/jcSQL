@@ -12,6 +12,12 @@ column_attr_list::~column_attr_list()
 
 void column_attr_list::add_column_pair(column_attr_pair& pair)
 {
+    alter_column_pair(pair);
+}
+
+void column_attr_list::alter_column_pair(column_attr_pair& pair)
+{
+    items.erase(pair);
     items.insert(pair);
 }
 
