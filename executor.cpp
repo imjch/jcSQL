@@ -64,6 +64,7 @@ void evaluator::execute_delete(delete_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
+    t_mgr.delete_table(o->get_table_name());
 }
 
 void evaluator::execute_create(create_operation* o)
@@ -76,7 +77,7 @@ void evaluator::execute_create(create_operation* o)
     table_mgr::create_table(o->get_table_name());
     t_mgr.open_table(o->get_table_name());
     t_mgr.set_table_attrs(o->get_table_attr());
-    t_mgr.set_table_type_columns(o->get_type_column_table());
+    t_mgr.set_table_type_columns(o->get_type_column_list());
     t_mgr.close_table();
 }
 
@@ -97,8 +98,9 @@ void evaluator::execute_alter(alter_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
-    /*t_mgr.open_table(o->get_table_name());
-    */
+    t_mgr.open_table(o->get_table_name());
+    
+    t_mgr.close_table();
 }
 
 void evaluator::execute_insert(insert_operation* o)
@@ -109,7 +111,7 @@ void evaluator::execute_insert(insert_operation* o)
         return;
     }
     t_mgr.open_table(o->get_table_name());
-    t_mgr.insert_data(o->get_attr_val_list());
+    t_mgr.insert_data(o->get_attr_val_table());
     t_mgr.close_table();
 }
 

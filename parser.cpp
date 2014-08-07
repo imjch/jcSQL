@@ -92,7 +92,7 @@ create_operation* parser::JC_CREATE()
 {
     match(tag::ARROW);
     std::string table_name = TABLE_NAME();
-    type_column_table t_c_table = TYPE_COLUMN_PAIRS();
+    type_column_list t_c_table = TYPE_COLUMN_PAIRS();
     table_attr t_attr;
     if (lookahead.get_token_type() == tag::LBRACKET)
     {
@@ -132,7 +132,7 @@ alter_operation* parser::JC_ALTER()
         move();
         err_collector::add_error(err_msg_mgr::invalid_expression("invalid operator type %s",lookahead.get_token_text().c_str()));
     }
-    type_column_table table = TYPE_COLUMN_PAIRS();
+    type_column_list table = TYPE_COLUMN_PAIRS();
     VERIFY_END();
     return new alter_operation(op, table);
 }
@@ -153,7 +153,7 @@ insert_operation* parser::JC_INSERT()
 {
     match(tag::ARROW);
     std::string table_name = TABLE_NAME();
-    attr_val_list list;
+    attr_val_table list;
     if (lookahead.get_token_type() != tag::EOF_TYPE)
     {
         list = (ATTR_VAL_PAIRS());
@@ -265,9 +265,9 @@ std::list<std::string> parser::COLUMNS()
     return cols;
 }
 
-attr_val_list parser::ATTR_VAL_PAIRS()
+attr_val_table parser::ATTR_VAL_PAIRS()
 {
-    attr_val_list list;
+    attr_val_table list;
     while (lookahead.get_token_type() == tag::IDENTIFIER)
     {
         list.add_attr_val(ATTR_VAL_PAIR());
@@ -317,9 +317,9 @@ type_column_pair parser::TYPE_COLUMN_PAIR()
     return type_column_pair(val_type_to_i.at(type), col);
 }
 
-type_column_table parser::TYPE_COLUMN_PAIRS()
+type_column_list parser::TYPE_COLUMN_PAIRS()
 {
-    type_column_table table;
+    type_column_list table;
     table.add_type_column(TYPE_COLUMN_PAIR());
     while (lookahead.get_token_type() == tag::BASIC_TYPE)
     {

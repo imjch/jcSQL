@@ -33,7 +33,7 @@ void attr_val_pair::set_result_list(const result_list& list)
     result = list;
 }
 
-std::string attr_val_pair::get_attr_name()
+const std::string& attr_val_pair::get_attr_name() const
 {
     return attr_name;
 }
@@ -48,3 +48,12 @@ result_list attr_val_pair::get_result_list()
     return result;
 }
 
+const std::string& attr_val_pair::get_result()
+{
+    return result[0];
+}
+
+bool attr_val_pair::is_result_empty()
+{
+    return result.empty();
+}

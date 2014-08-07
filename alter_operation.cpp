@@ -5,7 +5,7 @@ alter_operation::alter_operation()
 {
 }
 
-alter_operation::alter_operation(operators op, type_column_table list)
+alter_operation::alter_operation(operators op, type_column_list list)
 :columns_list(op,list)
 {
 }
@@ -29,7 +29,7 @@ operators alter_operation::get_op()
     return columns_list.first;
 }
 
-type_column_table alter_operation::get_type_column_table()
+type_column_list alter_operation::get_type_column_list()
 {
     return columns_list.second;
 }

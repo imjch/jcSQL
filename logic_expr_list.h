@@ -11,6 +11,7 @@ public:
     iterator begin();
     iterator end();
     size_t size();
+    bool empty();
 private:
     std::list<logic_expr> items;
 };

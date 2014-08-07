@@ -18,6 +18,7 @@ public:
     iterator begin();
     iterator end();
     size_t size();
+    bool empty();
 private:
     a_c_table table;
 };

@@ -34,3 +34,7 @@ table_attr::iterator table_attr::end()
     return table.end();
 }
 
+bool table_attr::empty()
+{
+    return table.empty();
+}

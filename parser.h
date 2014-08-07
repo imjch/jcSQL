@@ -6,7 +6,7 @@
 #include "logic_expr_list.h"
 #include "logic_conn_table.h"
 #include "type_column_pair.h"
-#include "type_column_table.h"
+#include "type_column_list.h"
 #include "table_attr.h"
 #include "column_attr_pair.h"
 #include "select_operation.h"
@@ -32,9 +32,9 @@ private:
     table_attr GET_TABLE_ATTR();
     logic_conn_table SELECTORS();
     type_column_pair TYPE_COLUMN_PAIR();
-    type_column_table TYPE_COLUMN_PAIRS();
+    type_column_list TYPE_COLUMN_PAIRS();
     attr_val_pair ATTR_VAL_PAIR();
-    attr_val_list ATTR_VAL_PAIRS();
+    attr_val_table ATTR_VAL_PAIRS();
     logic_expr LOGIC_EXPR_PAIR();
     logic_conn_table LOGIC_EXPR_PAIRS();
     std::string TABLE_NAME();

@@ -23,12 +23,17 @@ void column_attr_pair::set_attr(column_attr val)
     attr = val;
 }
 
-std::string column_attr_pair::get_column_name()
+const std::string& column_attr_pair::get_column_name() const
 {
     return column_name;
 }
 
-column_attr column_attr_pair::get_attr()
+const column_attr column_attr_pair::get_attr() const
 {
     return attr;
+}
+
+bool operator<(const column_attr_pair& x, const column_attr_pair& y)
+{
+    return x.get_column_name() < y.get_column_name();
 }

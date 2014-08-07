@@ -63,9 +63,15 @@ void table_mgr::delete_table(const std::string& table_name)
 void table_mgr::open_table(const std::string& table_name)
 {
     assert(table_name.size()>0);
-    current_table = table_name;
-    auto t = get_full_table_path(current_db, current_table);
-    f_mgr.open(t, "a+");
+    set_current_table(table_name);
+    f_mgr.open(get_full_table_path(current_db, current_table), "a+");
+    f_attr_mgr.open(get_full_table_attr_path(current_db, current_table), "r+");
+    get_table_attr();//该函数依赖f_attr_mgr的打开状态，后期重构。
+}
+
+void table_mgr::set_current_table(const std::string& name)
+{
+    current_table = name;
 }
 
 void table_mgr::close_table()
@@ -86,33 +92,28 @@ bool table_mgr::contain_attr(inner_structure& val, std::string& v)
     return false;
 }
 
-void table_mgr::set_table_type_columns(type_column_table& t_c_table)
+void table_mgr::set_table_type_columns(type_column_list& t_c_list)
 {
-    file_mgr f;
-    f.open(get_full_table_attr_path(current_db, current_table), "r+");
-    inner_structure root;
+ /*   inner_structure root;
     inner_structure_writer writer;
-    root = fetch_all_data(f);
+    root = fetch_all_data(f_attr_mgr);
     inner_structure sub_node = root["columns"];
     for (auto iter = t_c_table.begin(); iter != t_c_table.end(); ++iter)
     {
         sub_node[iter->get_column()] = val_type_to_s[iter->get_type()];
     }
-    std::cout << root << std::endl;
-    std::cout << sub_node << std::endl;
     root["columns"] = sub_node;
     std::cout << root << std::endl;
-    f.write(writer.write(root));
-    f.close();
+    f_attr_mgr.write(writer.write(root));*/
+    assert(!t_c_list.empty());
+    current_type_column_list = t_c_list;
 }
 
 void table_mgr::set_table_attrs(table_attr& attrs)
 {
-    file_mgr f;
-    f.open(get_full_table_attr_path(current_db, current_table), "r+");
-    inner_structure root;
+   /* inner_structure root;
     inner_structure_writer writer;
-    root = fetch_all_data(f);
+    root = fetch_all_data(f_attr_mgr);
     inner_structure sub_node = root["attributes"];
     if (attrs.size()>0)
     {
@@ -128,8 +129,9 @@ void table_mgr::set_table_attrs(table_attr& attrs)
         }
     }
     root["attributes"] = sub_node;
-    f.write(writer.write(root));
-    f.close();
+    f_attr_mgr.write(writer.write(root));*/
+    assert(!attrs.empty());
+    current_table_attr = attrs;
 }
 
 bool table_mgr::exist(const std::string& table_name)
@@ -137,9 +139,8 @@ bool table_mgr::exist(const std::string& table_name)
     return file_mgr::exist(db_mgr::get_current_database()+ "\\" + table_name);
 }
 
-void table_mgr::insert_data(attr_val_list& list)
+void table_mgr::insert_data(attr_val_table& list)
 {
-    get_table_attr();
     inner_structure_writer writer;
     inner_structure root = fetch_all_data(f_mgr);
     size_t i = root.size();
@@ -159,7 +160,7 @@ void table_mgr::insert_data(attr_val_list& list)
     f_mgr.write(writer.write(root));
 }
 
-table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr_val_list& list)
+table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr_val_table& list)
 {
     data_record_indicator record;
     for (auto iter = current_type_column_list.begin(); iter != current_type_column_list.end();++iter)
@@ -180,8 +181,7 @@ table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr
 
 void table_mgr::get_table_attr()
 {
-    file_mgr f(get_full_table_attr_path(current_db, current_table), "r");
-    inner_structure root = fetch_all_data(f);
+    inner_structure root = fetch_all_data(f_attr_mgr);
     inner_structure attr_node = root["attributes"];
     for (auto iter = attr_node.begin(); iter != attr_node.end(); iter++)
     {
@@ -197,12 +197,23 @@ void table_mgr::get_table_attr()
     }
 }
 
-//void table_mgr::alter_table(operators op, type_column_table& t_c_table)
-//{
-//    assert(op >= 0);
-//    assert(t_c_table.size()>0);
-//
-//}
+void table_mgr::add_column(type_column_list& t_c_list)
+{
+    assert(!t_c_list.empty());
+    current_type_column_list.add_type_column(t_c_list.begin(), t_c_list.end());
+}
+
+void table_mgr::remove_column(type_column_list& t_c_list)
+{
+    assert(!t_c_list.empty());
+    current_type_column_list.remove_type_column(t_c_list.begin(),t_c_list.end());
+}
+
+void table_mgr::alter_column(type_column_list& t_c_list)
+{
+    assert(!t_c_list.empty());
+    current_type_column_list.remove_type_column(t_c_list.begin(), t_c_list.end());
+}
 
 //table_mgr::result_table table_mgr::get_data(column_list& li, logic_conn_table& l_c_table)
 //{

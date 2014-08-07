@@ -28,3 +28,8 @@ size_t logic_expr_list::size()
 {
     return items.size();
 }
+
+bool logic_expr_list::empty()
+{
+    return items.empty();
+}
