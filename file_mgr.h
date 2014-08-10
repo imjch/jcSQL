@@ -15,6 +15,7 @@ public:
     static void create_file(const std::string&);
     static void remove_file(const std::string&);
     static bool exist(const std::string&);
+    bool is_open();
     void close();
     void open(const std::string&, const char * fmode);
 private:

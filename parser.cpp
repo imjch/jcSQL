@@ -114,6 +114,7 @@ alter_operation* parser::JC_ALTER()
 {
     match(tag::ARROW);
     operators op;
+    std::string table_name = TABLE_NAME();
     switch (lookahead.get_token_type())
     {
     case tag::ADD:
@@ -134,7 +135,7 @@ alter_operation* parser::JC_ALTER()
     }
     type_column_list table = TYPE_COLUMN_PAIRS();
     VERIFY_END();
-    return new alter_operation(op, table);
+    return new alter_operation(table_name,op, table);
 }
 
 delete_operation* parser::JC_DELETE()

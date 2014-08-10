@@ -1,10 +1,10 @@
 #pragma once
-#include <unordered_map>
+#include <map>
 #include "attr_val_pair.h"
 class attr_val_table
 {
 public:
-    typedef std::unordered_map<std::string, attr_val_pair>::iterator iterator;
+    typedef std::map<std::string, attr_val_pair>::iterator iterator;
     attr_val_table();
     ~attr_val_table();
     void add_attr_val(attr_val_pair&);
@@ -14,6 +14,6 @@ public:
     size_t size();
     bool empty();
 private:
-    std::unordered_map<std::string,attr_val_pair> map;
+    std::map<std::string, attr_val_pair> map;
 };
 

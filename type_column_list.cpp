@@ -51,7 +51,11 @@ void type_column_list::remove_type_column(type_column_pair& pair)
 
 void type_column_list::remove_type_column(iterator& begin,iterator& end)
 {
-    items.erase(begin,end);
+    while (begin!=end)
+    {
+        items.erase(*begin);
+        ++begin;
+    }
 }
 
 void type_column_list::alter_column_type(iterator& begin, iterator& end)

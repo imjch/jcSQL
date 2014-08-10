@@ -5,9 +5,10 @@ alter_operation::alter_operation()
 {
 }
 
-alter_operation::alter_operation(operators op, type_column_list list)
+alter_operation::alter_operation(const std::string& name,operators op, type_column_list list)
 :columns_list(op,list)
 {
+    operation::set_table_name(name);
 }
 
 alter_operation::~alter_operation()
@@ -24,7 +25,7 @@ void alter_operation::add_typ_column(type_column_pair& pair)
     columns_list.second.add_type_column(pair);
 }
 
-operators alter_operation::get_op()
+operators alter_operation::get_operators()
 {
     return columns_list.first;
 }

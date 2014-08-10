@@ -3,18 +3,18 @@
 #include <Shlwapi.h>
 #include <cassert>
 #include <cstdio>
-
+#include <fstream>
 file_mgr::~file_mgr()
 {
    
 } 
-file_mgr::file_mgr()
+file_mgr::file_mgr() :fp(NULL)
 {
 
 }
 void file_mgr::close()
 {
-    if (fp >= NULL)
+    if (fp > NULL)
     {
         ::fclose(fp);
     }
@@ -63,6 +63,15 @@ void file_mgr::append(const std::string& content)
         ::abort();
     }
     write(content);
+}
+
+bool file_mgr::is_open()
+{
+    if (fp!=NULL)
+    {
+        return true;
+    }
+    return false;
 }
 
 void file_mgr::write(const std::string& content)

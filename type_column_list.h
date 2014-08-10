@@ -17,9 +17,7 @@ public:
     size_t size();
     iterator begin();
     iterator end();
-   
     bool empty();
-
 private:
     std::set<type_column_pair> items;
 };

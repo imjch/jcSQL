@@ -13,7 +13,7 @@ current_db(db_mgr::get_current_database())
 {
 }
 
-table_mgr::table_mgr(const std::string& table_name):
+table_mgr::table_mgr(const table_name& table_name) :
 current_table(table_name),
 current_db(db_mgr::get_current_database())
 {
@@ -24,14 +24,14 @@ table_mgr::~table_mgr()
 {
 }
 
-std::string table_mgr::get_full_table_path(const std::string& db,const std::string& table)
+std::string table_mgr::get_full_table_path(const db_name& db, const table_name& table)
 {
     assert(db.size()>0);
     assert(table.size()>0);
     return db + "\\" + table;
 }
 
-std::string table_mgr::get_full_table_attr_path(const std::string& db, const std::string& table)
+std::string table_mgr::get_full_table_attr_path(const db_name& db,const table_name& table)
 {
     return get_full_table_path(db,table) + ".attr";
 }
@@ -52,7 +52,7 @@ void table_mgr::create_table(const std::string& table_name)
     out.close();
 }
 
-void table_mgr::delete_table(const std::string& table_name)
+void table_mgr::delete_table(const table_name& table_name)
 {
     assert(table_name.size()>0);
     std::string full_path(db_mgr::get_current_database() + "\\" + table_name);
@@ -60,22 +60,27 @@ void table_mgr::delete_table(const std::string& table_name)
     file_mgr::remove_file(full_path + ".attr");
 }
 
-void table_mgr::open_table(const std::string& table_name)
+void table_mgr::open_table(const table_name& table_name)
 {
     assert(table_name.size()>0);
-    set_current_table(table_name);
-    f_mgr.open(get_full_table_path(current_db, current_table), "a+");
-    f_attr_mgr.open(get_full_table_attr_path(current_db, current_table), "r+");
-    get_table_attr();//该函数依赖f_attr_mgr的打开状态，后期重构。
+    if (!f_mgr.is_open())
+    {
+        set_current_table(table_name);
+        f_mgr.open(get_full_table_path(current_db, current_table), "a+");
+        f_attr_mgr.open(get_full_table_attr_path(current_db, current_table), "r+");
+        get_table_attr();//该函数依赖f_attr_mgr的打开状态，后期重构。
+    }
 }
 
-void table_mgr::set_current_table(const std::string& name)
+void table_mgr::set_current_table(const table_name& name)
 {
     current_table = name;
 }
 
 void table_mgr::close_table()
 {
+    write_back();//writing all the data to table file.
+    f_attr_mgr.close();
     f_mgr.close();
 }
     
@@ -94,47 +99,17 @@ bool table_mgr::contain_attr(inner_structure& val, std::string& v)
 
 void table_mgr::set_table_type_columns(type_column_list& t_c_list)
 {
- /*   inner_structure root;
-    inner_structure_writer writer;
-    root = fetch_all_data(f_attr_mgr);
-    inner_structure sub_node = root["columns"];
-    for (auto iter = t_c_table.begin(); iter != t_c_table.end(); ++iter)
-    {
-        sub_node[iter->get_column()] = val_type_to_s[iter->get_type()];
-    }
-    root["columns"] = sub_node;
-    std::cout << root << std::endl;
-    f_attr_mgr.write(writer.write(root));*/
     assert(!t_c_list.empty());
     current_type_column_list = t_c_list;
 }
 
 void table_mgr::set_table_attrs(table_attr& attrs)
 {
-   /* inner_structure root;
-    inner_structure_writer writer;
-    root = fetch_all_data(f_attr_mgr);
-    inner_structure sub_node = root["attributes"];
-    if (attrs.size()>0)
-    {
-        for (auto iter = attrs.begin(); iter !=attrs.end(); iter++)
-        {
-            for (auto iiter = iter->second.begin(); iiter != iter->second.end(); iiter++)
-            {
-                if (!contain_attr(sub_node[column_attrs_to_s[iiter->get_attr()]], iiter->get_column_name()))
-                {
-                    sub_node[column_attrs_to_s[iiter->get_attr()]].append(iiter->get_column_name());
-                }
-            }
-        }
-    }
-    root["attributes"] = sub_node;
-    f_attr_mgr.write(writer.write(root));*/
     assert(!attrs.empty());
     current_table_attr = attrs;
 }
 
-bool table_mgr::exist(const std::string& table_name)
+bool table_mgr::exist(const table_name& table_name)
 {
     return file_mgr::exist(db_mgr::get_current_database()+ "\\" + table_name);
 }
@@ -224,4 +199,26 @@ Json::Value table_mgr::fetch_all_data(file_mgr& file)
     return root;
 }
 
+void table_mgr::write_back()
+{
+   // inner_structure_writer writer;
+    inner_structure_styled_writer styled_writer;
+    inner_structure root = fetch_all_data(f_attr_mgr);
+    inner_structure attr_node = root["attributes"];
+    for (auto iter = current_table_attr.begin(); iter != current_table_attr.end(); iter++)
+    {
+        for (auto iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++)
+        {
+            attr_node[column_attrs_to_s[iter2->get_attr()]].append(iter2->get_column_name());
+        }
+    }
 
+    inner_structure column_node = root["columns"];
+    for (auto iter = current_type_column_list.begin(); iter != current_type_column_list.end(); iter++)
+    {
+        column_node[iter->get_column()] = val_type_to_s[iter->get_type()];
+    }
+    root["attributes"] = attr_node;
+    root["columns"] = column_node;
+    f_attr_mgr.write(styled_writer.write(root));
+}

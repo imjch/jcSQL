@@ -55,6 +55,7 @@ void evaluator::execute_select(select_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
+
 }
 
 void evaluator::execute_delete(delete_operation* o)
@@ -64,7 +65,7 @@ void evaluator::execute_delete(delete_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
-    t_mgr.delete_table(o->get_table_name());
+    
 }
 
 void evaluator::execute_create(create_operation* o)
@@ -99,7 +100,21 @@ void evaluator::execute_alter(alter_operation* o)
         return;
     }
     t_mgr.open_table(o->get_table_name());
-    
+    auto list = o->get_type_column_list();
+    switch (o->get_operators())
+    {
+    case ADD:
+        t_mgr.add_column(list);
+        break;
+    case SUB:
+        t_mgr.remove_column(list);
+        break;
+    case SLASH:
+        t_mgr.alter_column(list);
+        break;
+    default:
+        throw std::runtime_error("invalid operator of 'alter'");
+    }
     t_mgr.close_table();
 }
 

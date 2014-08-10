@@ -9,12 +9,12 @@ class alter_operation :
 {
 public:
     alter_operation();
-    alter_operation(operators, type_column_list);
+    alter_operation(const std::string&,operators, type_column_list);
     ~alter_operation();
     void set_op(operators op);
     void add_typ_column(type_column_pair& pair);
     type_column_list get_type_column_list();
-    operators get_op();
+    operators get_operators();
 private:
     std::pair<operators,type_column_list> columns_list;
 };
