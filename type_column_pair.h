@@ -5,6 +5,7 @@ class type_column_pair
 {
 public:
     type_column_pair(val_type, const std::string&);
+    type_column_pair();
     ~type_column_pair();
     void set_type(val_type);
     void set_column(const std::string&);

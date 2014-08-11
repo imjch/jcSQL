@@ -6,6 +6,11 @@ type_column_pair::type_column_pair(val_type v, const std::string& col)
 {
 }
 
+type_column_pair::type_column_pair()
+{
+
+}
+
 type_column_pair::~type_column_pair()
 {
 }

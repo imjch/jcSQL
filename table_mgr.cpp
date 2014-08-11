@@ -5,8 +5,55 @@
 #include <cassert>
 #include <string>
 #include <iostream>
+#include "attr_val_pair.h"
+#include "result_list.h"
 #include <list>
 #pragma comment(lib,"jsoncpp.lib")
+
+//the keys is seperated by comma and no white space existed in it.  Ex:a,b,c
+//attr_val_table table_mgr::make_primary_key_list(inner_structure& val)
+//{
+//    typedef attr_val_table primary_key_list;
+//    assert(val.isString());
+//    std::string s = val.asString();
+//    assert(!s.empty());
+//
+//    primary_key_list li;
+//    std::string buf;
+//    auto iter = current_table_attr.get_column_attr(PRIMARY_KEY).begin();
+//    for (size_t i = 0; i < s.size(); i++)
+//    {
+//        if (s[i]!=',')
+//        {
+//            buf.push_back(s[i]);
+//        }
+//        else
+//        {
+//            li.add_attr_val(attr_val_pair(iter->get_column_name(), result_list(buf), current_type_column_list.get_type_column_pair(iter->get_column_name()).get_type()));
+//            buf.clear();
+//            ++iter;
+//        }
+//    }
+//    if (!buf.empty())
+//    {
+//        li.add_attr_val(attr_val_pair(iter->get_column_name(), result_list(buf), current_type_column_list.get_type_column_pair(iter->get_column_name()).get_type()));
+//    }
+//    return li;
+//}
+
+//'arr' is a array containing every data fields.
+attr_val_table table_mgr::make_attr_val_table(inner_structure& arr)
+{
+    assert(arr.isArray());
+    attr_val_table a_v_table;
+    auto val_iter = arr.begin();
+    auto column_iter = current_type_column_list.begin();
+    while (val_iter!=arr.end())
+    {
+        a_v_table.add_attr_val(attr_val_pair(column_iter->first, result_list((*val_iter).asString()), column_iter->second.get_type()));
+    }
+    return a_v_table;
+}
 
 table_mgr::table_mgr():
 current_db(db_mgr::get_current_database())
@@ -114,25 +161,48 @@ bool table_mgr::exist(const table_name& table_name)
     return file_mgr::exist(db_mgr::get_current_database()+ "\\" + table_name);
 }
 
-void table_mgr::insert_data(attr_val_table& list)
+std::pair<bool, std::string> table_mgr::verify_primary_key(attr_val_table& li)
 {
-    inner_structure_writer writer;
-    inner_structure root = fetch_all_data(f_mgr);
-    size_t i = root.size();
-    data_record_indicator record = construct_data_record_indicator(list);
-    Json::Value null_val(-1);
-    for (auto iter = record.begin(); iter != record.end();iter++)
+    column_attr_list key_list = current_table_attr.get_column_attr(PRIMARY_KEY);
+    std::string primary_key_val_list;
+    for (auto iter = key_list.begin(); iter != key_list.end(); iter++)
     {
-        if (iter->second.first==READLVAL)
+        if (!li.contain(iter->get_column_name()))
         {
-            root[std::to_string(i)].append(iter->second.second);
+            return std::pair<bool, std::string>(false, std::string());
         }
-        else
+        primary_key_val_list.append(iter->get_column_name());
+        primary_key_val_list.push_back(',');
+    }
+    primary_key_val_list.pop_back();//pop the comma in the end.
+    return std::pair<bool, std::string>(true, primary_key_val_list);
+}
+
+void table_mgr::verify_data_field(attr_val_table& list)
+{
+    for (auto iter = list.begin(); iter != list.end(); ++iter)
+    {
+        if (!current_type_column_list.contain(iter->first))
         {
-            root[std::to_string(i)].append(null_val);
+            std::cout << err_msg_mgr::invalid_expression("no column %s", iter->first)<<std::endl;
+            exit(1);
         }
     }
-    f_mgr.write(writer.write(root));
+}
+
+void table_mgr::insert_record(attr_val_table& list)
+{
+    verify_data_field(list);
+    std::pair<bool, std::string> key_pair = verify_primary_key(list);
+    if (!key_pair.first)
+    {
+        throw std::runtime_error("primary key must be specified");
+    }
+    if (data_record_table.contain(key_pair.second))
+    {
+        throw std::runtime_error("this record has already existed");
+    }
+    data_record_table.add_record(key_pair.second, list);
 }
 
 table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr_val_table& list)
@@ -140,7 +210,7 @@ table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr
     data_record_indicator record;
     for (auto iter = current_type_column_list.begin(); iter != current_type_column_list.end();++iter)
     {
-        record[iter->get_column()] = std::make_pair(NULLABLE,"");
+        record[iter->first] = std::make_pair(NULLABLE,"");
     }
     for (auto iter = list.begin(); iter != list.end(); ++iter)
     {
@@ -216,9 +286,20 @@ void table_mgr::write_back()
     inner_structure column_node = root["columns"];
     for (auto iter = current_type_column_list.begin(); iter != current_type_column_list.end(); iter++)
     {
-        column_node[iter->get_column()] = val_type_to_s[iter->get_type()];
+        column_node[iter->first] = val_type_to_s[iter->second.get_type()];
     }
     root["attributes"] = attr_node;
     root["columns"] = column_node;
     f_attr_mgr.write(styled_writer.write(root));
 }
+
+void table_mgr::get_table_records()
+{
+    inner_structure root= fetch_all_data(f_mgr);
+    for (auto iter = root.begin(); iter != root.end(); iter++)
+    {
+        data_record_table.add_record(iter.key().asString(), make_attr_val_table(*iter));
+    }
+}
+
+

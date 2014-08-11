@@ -19,6 +19,11 @@ attr_val_pair attr_val_table::get_attr_val(const std::string& attr_name)
     return map[attr_name];
 }
 
+bool attr_val_table::contain(const std::string& col_name)
+{
+    return map.count(col_name) > 0 ? true : false;
+}
+
 attr_val_table::iterator attr_val_table::begin()
 {
     return map.begin();

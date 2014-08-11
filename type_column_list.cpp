@@ -8,21 +8,20 @@ type_column_list::~type_column_list()
 {
 }
 
-void type_column_list::add_type_column(type_column_pair& pair)
+void type_column_list::add_type_column(const type_column_pair& pair)
 {
     alter_column_type(pair);
 }
 
 void type_column_list::add_type_column(iterator& begin, iterator& end)
 {
-    alter_column_type(begin, end);
+    while (begin != end)
+    {
+        add_type_column(begin->second);
+        ++begin;
+    }
 }
 
-void type_column_list::alter_column_type(type_column_pair& pair)
-{
-    items.erase(pair);
-    items.insert(pair);
-}
 
 size_t type_column_list::size()
 {
@@ -44,21 +43,41 @@ bool type_column_list::empty()
     return items.empty();
 }
 
-void type_column_list::remove_type_column(type_column_pair& pair)
+void type_column_list::remove_type_column(const type_column_pair& pair)
 {
-    items.erase(pair);
+    items.erase(pair.get_column());
 }
 
 void type_column_list::remove_type_column(iterator& begin,iterator& end)
 {
     while (begin!=end)
     {
-        items.erase(*begin);
+        remove_type_column(begin->second);
         ++begin;
     }
 }
 
 void type_column_list::alter_column_type(iterator& begin, iterator& end)
 {
-    add_type_column(begin, end);
+    while (begin!=end)
+    {
+        alter_column_type(begin->second);
+        ++begin;
+    }
+}
+
+void type_column_list::alter_column_type(const type_column_pair& pair)
+{
+    items.erase(pair.get_column());
+    items.insert(std::make_pair(pair.get_column(), pair));
+}
+
+type_column_pair type_column_list::get_type_column_pair(const std::string& col)
+{
+    return items[col];
+}
+
+bool type_column_list::contain(const std::string& col_name)
+{
+    return items.count(col_name) > 0 ? true : false;
 }

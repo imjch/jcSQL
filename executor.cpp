@@ -125,8 +125,15 @@ void evaluator::execute_insert(insert_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
-    t_mgr.open_table(o->get_table_name());
-    t_mgr.insert_data(o->get_attr_val_table());
-    t_mgr.close_table();
+    try
+    {
+        t_mgr.open_table(o->get_table_name());
+        t_mgr.insert_record(o->get_attr_val_table());
+        t_mgr.close_table();
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 }
 

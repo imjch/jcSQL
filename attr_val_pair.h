@@ -2,6 +2,7 @@
 #include <string>
 #include "val_type.h"
 #include "result_list.h"
+
 class attr_val_pair
 {
 public:
@@ -22,4 +23,3 @@ private:
     result_list result;
     val_type v_t;
 };
-
