@@ -10,7 +10,7 @@ public:
     attr_val_table();
     ~attr_val_table();
     void add_attr_val(attr_val_pair&);
-    attr_val_pair get_attr_val(const std::string&);
+    attr_val_pair& get_attr_val(const std::string&);
     bool contain(const std::string&);
     iterator begin();
     iterator end();

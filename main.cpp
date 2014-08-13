@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 {
     //create <- student string name int age [name primary key,age not null]
     //insert <- student name = \"jiang chuan\" age=10
-    lexer lexer(string("insert <- student / string Dept"));
+    lexer lexer(string("insert <- student name='jiang chuan' age= 30 "));
     parser parser(lexer);
     operation* o = parser.program();
     shared_ptr<operation> op(o);

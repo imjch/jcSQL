@@ -14,7 +14,7 @@ void attr_val_table::add_attr_val(attr_val_pair& pair)
     map[pair.get_attr_name()] = pair;
 }
 
-attr_val_pair attr_val_table::get_attr_val(const std::string& attr_name)
+attr_val_pair& attr_val_table::get_attr_val(const std::string& attr_name)
 {
     return map[attr_name];
 }

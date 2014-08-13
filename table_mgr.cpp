@@ -8,6 +8,7 @@
 #include "attr_val_pair.h"
 #include "result_list.h"
 #include <list>
+#include "single_record.h"
 #pragma comment(lib,"jsoncpp.lib")
 
 //the keys is seperated by comma and no white space existed in it.  Ex:a,b,c
@@ -50,9 +51,28 @@ attr_val_table table_mgr::make_attr_val_table(inner_structure& arr)
     auto column_iter = current_type_column_list.begin();
     while (val_iter!=arr.end())
     {
-        a_v_table.add_attr_val(attr_val_pair(column_iter->first, result_list((*val_iter).asString()), column_iter->second.get_type()));
+        a_v_table.add_attr_val(attr_val_pair(column_iter->first, (*val_iter).asString(), column_iter->second.get_type()));
+        ++val_iter;
+        ++column_iter;
     }
     return a_v_table;
+}
+
+table_mgr::inner_structure table_mgr::record_to_data(single_record& record)
+{
+    table_mgr::inner_structure single_record;
+    for (auto iter = record.begin(); iter != record.end(); iter++)
+    {
+        if (iter->second.get_val_type()==NULLABLE)
+        {
+            single_record.append(NULL_VAL);
+        }
+        else
+        {
+            single_record.append(iter->second.get_result());
+        }
+    }
+    return single_record;
 }
 
 table_mgr::table_mgr():
@@ -171,8 +191,8 @@ std::pair<bool, std::string> table_mgr::verify_primary_key(attr_val_table& li)
         {
             return std::pair<bool, std::string>(false, std::string());
         }
-        primary_key_val_list.append(iter->get_column_name());
-        primary_key_val_list.push_back(',');
+        primary_key_val_list.append(li.get_attr_val(iter->get_column_name()).get_result());
+        primary_key_val_list.append(",");
     }
     primary_key_val_list.pop_back();//pop the comma in the end.
     return std::pair<bool, std::string>(true, primary_key_val_list);
@@ -202,25 +222,24 @@ void table_mgr::insert_record(attr_val_table& list)
     {
         throw std::runtime_error("this record has already existed");
     }
-    data_record_table.add_record(key_pair.second, list);
+    data_record_table.add_record(make_single_record(key_pair.second, list));
 }
 
-table_mgr::data_record_indicator table_mgr::construct_data_record_indicator(attr_val_table& list)
+single_record table_mgr::make_single_record(const std::string& primary_key, attr_val_table& a_v_table)
 {
-    data_record_indicator record;
+    single_record record;
+    attr_val_table table;
     for (auto iter = current_type_column_list.begin(); iter != current_type_column_list.end();++iter)
     {
-        record[iter->first] = std::make_pair(NULLABLE,"");
+        table.add_attr_val(attr_val_pair(iter->first,result_list(),NULLABLE));
     }
-    for (auto iter = list.begin(); iter != list.end(); ++iter)
+    for (auto iter = a_v_table.begin(); iter != a_v_table.end(); ++iter)
     {
-        if (record.count(iter->first)<0)
-        {
-            throw std::runtime_error(err_msg_mgr::invalid_expression("column %s non-exists,please check it again.",iter->first));
-        }
-        record[iter->first].first=READLVAL;
-        record[iter->first].second=iter->second.get_result_list()[0];
+        table.get_attr_val(iter->first).set_result(iter->second.get_result());
+        table.get_attr_val(iter->first).set_val_type(iter->second.get_val_type());
     }
+    record.set_primary_key(primary_key);
+    record.set_record(table);
     return record;
 }
 
@@ -260,7 +279,7 @@ void table_mgr::alter_column(type_column_list& t_c_list)
     current_type_column_list.alter_column_type(t_c_list.begin(), t_c_list.end());
 }
 
-Json::Value table_mgr::fetch_all_data(file_mgr& file)
+table_mgr::inner_structure table_mgr::fetch_all_data(file_mgr& file)
 {
     inner_structure_reader reader;
     inner_structure root;
@@ -272,6 +291,21 @@ Json::Value table_mgr::fetch_all_data(file_mgr& file)
 void table_mgr::write_back()
 {
    // inner_structure_writer writer;
+    attrs_write_back();
+    records_write_back();
+}
+
+void table_mgr::get_table_records()
+{
+    inner_structure root= fetch_all_data(f_mgr);
+    for (auto iter = root.begin(); iter != root.end(); iter++)
+    {
+        data_record_table.add_record(make_single_record(iter.key().asString(), make_attr_val_table(*iter)));
+    }
+}
+
+void table_mgr::attrs_write_back()
+{
     inner_structure_styled_writer styled_writer;
     inner_structure root = fetch_all_data(f_attr_mgr);
     inner_structure attr_node = root["attributes"];
@@ -293,13 +327,16 @@ void table_mgr::write_back()
     f_attr_mgr.write(styled_writer.write(root));
 }
 
-void table_mgr::get_table_records()
+void table_mgr::records_write_back()
 {
-    inner_structure root= fetch_all_data(f_mgr);
-    for (auto iter = root.begin(); iter != root.end(); iter++)
+    auto record_list = data_record_table.get_all_records();
+    inner_structure root = fetch_all_data(f_mgr);
+    for (auto iter = record_list.begin(); iter != record_list.end(); iter++)
     {
-        data_record_table.add_record(iter.key().asString(), make_attr_val_table(*iter));
+        root[iter->get_primary_key()] = record_to_data(*iter);
     }
+    inner_structure_writer writer;
+    f_mgr.write(writer.write(root));
 }
 
 
