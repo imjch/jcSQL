@@ -339,4 +339,11 @@ void table_mgr::records_write_back()
     f_mgr.write(writer.write(root));
 }
 
+void table_mgr::union_logic_selector(logic_conn_table& table)
+{
+    std::map<std::string, std::string, val_type> and_result;
+    
+    auto and_list = table.get_logic_expr_list(AND);
+
+}
 

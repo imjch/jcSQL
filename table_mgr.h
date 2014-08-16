@@ -14,10 +14,7 @@
 #include "record_table.h"
 #include "val_type.h"
 #include "json\json.h"
-
 #pragma comment(lib,"jsoncpp.lib")
-
-
 
 class table_mgr:private uncopyable
 {
@@ -31,14 +28,13 @@ public:
     typedef Json::Reader inner_structure_reader;
     typedef Json::StyledWriter inner_structure_styled_writer;
     typedef std::list<column_name> column_list;
-   
-    table_mgr(const std::string&);
-    table_mgr();
-    ~table_mgr();
     static bool exist(const table_name&);
     static void create_table(const table_name&);
     static void delete_table(const table_name&);
-  
+
+    table_mgr(const std::string&);
+    table_mgr();
+    ~table_mgr();
     void set_table_attrs(table_attr& attrs);
     void set_table_type_columns(type_column_list&);
     void add_column(type_column_list&);
@@ -53,6 +49,7 @@ private:
     attr_val_table make_primary_key_list(inner_structure&);
     attr_val_table make_attr_val_table(inner_structure& arr);
     inner_structure record_to_data(single_record&);
+    void union_logic_selector(logic_conn_table&);
     void set_current_table(const table_name&);
     void get_table_attr();
     void get_table_records();

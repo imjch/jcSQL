@@ -55,7 +55,6 @@ void evaluator::execute_select(select_operation* o)
         fprintf(stderr, "table %s non-exists...\n", o->get_table_name().c_str());
         return;
     }
-
 }
 
 void evaluator::execute_delete(delete_operation* o)

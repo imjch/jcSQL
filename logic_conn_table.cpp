@@ -9,9 +9,9 @@ logic_conn_table::~logic_conn_table()
 {
 }
 
-void logic_conn_table::add_logic_conn_list(std::pair<std::string,logic_expr_list>& pair)
+void logic_conn_table::add_logic_expr_list(logic_conn_type type, logic_expr_list& pair)
 {
-    table.insert(pair);
+    table.insert(std::make_pair(type,pair));
 }
 
 logic_conn_table::iterator logic_conn_table::begin()
@@ -29,8 +29,12 @@ size_t logic_conn_table::size()
     return table.size();
 }
 
-logic_expr_list logic_conn_table::get_logic_expr_list(const std::string& l_op)
+logic_expr_list logic_conn_table::get_logic_expr_list(logic_conn_type type)
 {
-    assert(l_op.size()>0);
-    return table[l_op];
+    return table[type];
+}
+
+bool logic_conn_table::empty()
+{
+    return table.empty();
 }

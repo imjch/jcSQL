@@ -388,15 +388,15 @@ logic_expr parser::LOGIC_EXPR_PAIR()
 logic_conn_table parser::LOGIC_EXPR_PAIRS()
 {
     logic_conn_table table;
-   logic_expr_list and_list;
-   logic_expr_list or_list;
-   logic_expr expr =LOGIC_EXPR_PAIR();
+    logic_expr_list and_list;
+    logic_expr_list or_list;
+    logic_expr expr = LOGIC_EXPR_PAIR();
 
     if (lookahead.get_token_type() != tag::IDENTIFIER)
     {
         and_list.add_logic_expr(expr);
-        table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
-        table.add_logic_conn_list(std::make_pair(std::string("OR"), or_list));
+        table.add_logic_conn_list(AND, and_list);
+        table.add_logic_conn_list(OR, or_list);
         return table;
     }
     switch (lookahead.get_token_type())
@@ -426,8 +426,8 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
             move();
         }
     }
-    table.add_logic_conn_list(std::make_pair(std::string("AND"), and_list));
-    table.add_logic_conn_list(std::make_pair(std::string("OR"), or_list));
+    table.add_logic_conn_list(AND, and_list);
+    table.add_logic_conn_list(OR, or_list);
     return table;
 }
 
