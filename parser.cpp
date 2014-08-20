@@ -14,6 +14,7 @@
 #include <utility>
 #include "alter_operation.h"
 #include "operators.h"
+#include "logic_op_type.h"
 parser::parser(lexer& lexer) :input(lexer), lookahead(input.next_token())
 {
 }
@@ -360,21 +361,21 @@ logic_expr parser::LOGIC_EXPR_PAIR()
     {
         val = GET_STRING_WITH_QUOTE();
         list.add(val);
-        return logic_expr(attr_name, op, list, JC_STRING);
+        return logic_expr(attr_name, logic_op_type_s_to_i[op], list, JC_STRING);
     }
     else if (lookahead.get_token_type() == tag::INT)
     {
         val = VALUE();
         match(tag::INT);
         list.add(val);
-        return logic_expr(attr_name, op, list, JC_INT);
+        return logic_expr(attr_name, logic_op_type_s_to_i[op], list, JC_INT);
     }
     else if (lookahead.get_token_type() == tag::DOUBLE)
     {
         val = VALUE();
         match(tag::DOUBLE);
         list.add(val);
-        return logic_expr(attr_name, op, list, JC_DOUBLE);
+        return logic_expr(attr_name, logic_op_type_s_to_i[op], list, JC_DOUBLE);
     }
     else
     {
@@ -395,8 +396,8 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
     if (lookahead.get_token_type() != tag::IDENTIFIER)
     {
         and_list.add_logic_expr(expr);
-        table.add_logic_conn_list(AND, and_list);
-        table.add_logic_conn_list(OR, or_list);
+        table.add_logic_expr_list(AND, and_list);
+        table.add_logic_expr_list(OR, or_list);
         return table;
     }
     switch (lookahead.get_token_type())
@@ -426,8 +427,8 @@ logic_conn_table parser::LOGIC_EXPR_PAIRS()
             move();
         }
     }
-    table.add_logic_conn_list(AND, and_list);
-    table.add_logic_conn_list(OR, or_list);
+    table.add_logic_expr_list(AND, and_list);
+    table.add_logic_expr_list(OR, or_list);
     return table;
 }
 

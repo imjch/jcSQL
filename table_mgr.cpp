@@ -339,11 +339,27 @@ void table_mgr::records_write_back()
     f_mgr.write(writer.write(root));
 }
 
-void table_mgr::union_logic_selector(logic_conn_table& table)
+void table_mgr::filter_records(logic_conn_table& table)
 {
-    std::map<std::string, std::string, val_type> and_result;
-    
-    auto and_list = table.get_logic_expr_list(AND);
+    typedef std::unordered_map<column_name, std::list<logic_expr>> unioned_logic_table;
+    unioned_logic_table unioned_and;
+    unioned_logic_table unioned_or;
+    if (table.contain(AND))
+    {
+        auto and_list = table.get_logic_expr_list(AND);
+        for (auto and_iter = and_list.begin(); and_iter != and_list.end(); and_iter++)
+        {
+            unioned_and[and_iter->get_attr()].push_back(*and_iter);
+        }
+    }
+    if (table.contain(OR))
+    {
+        auto or_list = table.get_logic_expr_list(OR);
+        for (auto or_iter = or_list.begin(); or_iter != or_list.end(); or_iter++)
+        {
+            unioned_or[or_iter->get_attr()].push_back(*or_iter);
+        }
+    }
 
 }
 

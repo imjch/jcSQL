@@ -49,7 +49,7 @@ private:
     attr_val_table make_primary_key_list(inner_structure&);
     attr_val_table make_attr_val_table(inner_structure& arr);
     inner_structure record_to_data(single_record&);
-    void union_logic_selector(logic_conn_table&);
+    void filter_records(logic_conn_table&);
     void set_current_table(const table_name&);
     void get_table_attr();
     void get_table_records();

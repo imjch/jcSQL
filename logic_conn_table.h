@@ -17,6 +17,7 @@ public:
     iterator end();
     size_t size();
     bool empty();
+    bool contain(logic_conn_type);
 private:
     std::unordered_map<logic_conn_type,logic_expr_list> table;
 };
