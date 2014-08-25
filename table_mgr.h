@@ -46,24 +46,25 @@ public:
     void open_table(const table_name&);
     void close_table();
 private:
-    attr_val_table make_primary_key_list(inner_structure&);
-    attr_val_table make_attr_val_table(inner_structure& arr);
     inner_structure record_to_data(single_record&);
     void filter_records(logic_conn_table&);
     void set_current_table(const table_name&);
     void get_table_attr();
     void get_table_records();
-    void attrs_write_back();
-    void write_back();
-    std::pair<bool, std::string> verify_primary_key(attr_val_table&);
+
+
+    std::pair<bool, primary_key> get_primary_key(attr_val_table&);
     void verify_data_field(attr_val_table&);
     std::string get_full_table_path(const db_name&, const table_name&);
     std::string get_full_table_attr_path(const db_name&, const table_name&);
     inner_structure fetch_all_data(file_mgr&);//待优化底层数据获取策略，初始版本暂时以最低效率运行。
     bool contain_attr(inner_structure&, std::string&);
-    single_record make_single_record(const std::string&,attr_val_table& list);
+    single_record make_single_record(primary_key&, attr_val_table& list);
+    primary_key make_primary_key(inner_structure&);
+    attr_val_table make_attr_val_table(inner_structure& arr);
+    void write_back();
     void records_write_back();
-
+    void attrs_write_back();
     db_name current_db;
     table_name current_table;
     table_attr  current_table_attr;

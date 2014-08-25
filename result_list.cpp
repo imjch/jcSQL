@@ -3,7 +3,6 @@
 
 result_list::result_list()
 {
-    
 }
 
 result_list::~result_list()

@@ -8,6 +8,7 @@ class logic_expr
 {
 public:
     logic_expr(const std::string&, logic_op_type, result_list&, val_type);
+    logic_expr(const std::string&, logic_op_type op, const std::string&, val_type);
     logic_expr();
     ~logic_expr();
     void set_attr(const std::string&);
@@ -16,6 +17,7 @@ public:
     logic_op_type get_op();
     void add_val(const std::string&);
     void set_val_type(val_type v);
+    result_list& get_result_list();
 private:
     attr_val_pair avp;
     logic_op_type op;

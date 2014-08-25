@@ -42,6 +42,35 @@
 //    return li;
 //}
 
+primary_key table_mgr::make_primary_key(inner_structure& val)
+{
+    assert(val.isString());
+    std::string key = val.asString();
+
+    assert(!key.empty());
+    std::string buf;
+    primary_key pri_key;
+    auto iter = current_table_attr.get_column_attr(PRIMARY_KEY).begin();
+    for (size_t i = 0; i < key.size(); i++)
+    {
+        if (key[i] != ',')
+        {
+            buf.push_back(key[i]);
+        }
+        else
+        {
+            pri_key.insert(iter->get_column_name(),buf);
+            buf.clear();
+            ++iter;
+        }
+    }
+    if (!buf.empty())
+    {
+        pri_key.insert(iter->get_column_name(), buf);
+    }
+    return pri_key;
+}
+
 //'arr' is a array containing every data fields.
 attr_val_table table_mgr::make_attr_val_table(inner_structure& arr)
 {
@@ -181,21 +210,19 @@ bool table_mgr::exist(const table_name& table_name)
     return file_mgr::exist(db_mgr::get_current_database()+ "\\" + table_name);
 }
 
-std::pair<bool, std::string> table_mgr::verify_primary_key(attr_val_table& li)
+std::pair<bool, primary_key> table_mgr::get_primary_key(attr_val_table& li)
 {
     column_attr_list key_list = current_table_attr.get_column_attr(PRIMARY_KEY);
-    std::string primary_key_val_list;
+    primary_key primary_key_val_list;
     for (auto iter = key_list.begin(); iter != key_list.end(); iter++)
     {
         if (!li.contain(iter->get_column_name()))
         {
-            return std::pair<bool, std::string>(false, std::string());
+            return std::pair<bool, primary_key>(false, primary_key());
         }
-        primary_key_val_list.append(li.get_attr_val(iter->get_column_name()).get_result());
-        primary_key_val_list.append(",");
+        primary_key_val_list.insert(iter->get_column_name(),li.get_attr_val(iter->get_column_name()).get_result());
     }
-    primary_key_val_list.pop_back();//pop the comma in the end.
-    return std::pair<bool, std::string>(true, primary_key_val_list);
+    return std::pair<bool, primary_key>(true, primary_key_val_list);
 }
 
 void table_mgr::verify_data_field(attr_val_table& list)
@@ -213,7 +240,8 @@ void table_mgr::verify_data_field(attr_val_table& list)
 void table_mgr::insert_record(attr_val_table& list)
 {
     verify_data_field(list);
-    std::pair<bool, std::string> key_pair = verify_primary_key(list);
+    std::pair<bool, primary_key> key_pair = get_primary_key(list);
+    
     if (!key_pair.first)
     {
         throw std::runtime_error("primary key must be specified");
@@ -225,7 +253,7 @@ void table_mgr::insert_record(attr_val_table& list)
     data_record_table.add_record(make_single_record(key_pair.second, list));
 }
 
-single_record table_mgr::make_single_record(const std::string& primary_key, attr_val_table& a_v_table)
+single_record table_mgr::make_single_record(primary_key& primary_key, attr_val_table& a_v_table)
 {
     single_record record;
     attr_val_table table;
@@ -300,7 +328,7 @@ void table_mgr::get_table_records()
     inner_structure root= fetch_all_data(f_mgr);
     for (auto iter = root.begin(); iter != root.end(); iter++)
     {
-        data_record_table.add_record(make_single_record(iter.key().asString(), make_attr_val_table(*iter)));
+        data_record_table.add_record(make_single_record(make_primary_key(iter.key()), make_attr_val_table(*iter)));
     }
 }
 
@@ -333,7 +361,7 @@ void table_mgr::records_write_back()
     inner_structure root = fetch_all_data(f_mgr);
     for (auto iter = record_list.begin(); iter != record_list.end(); iter++)
     {
-        root[iter->get_primary_key()] = record_to_data(*iter);
+        root[(iter->get_primary_key()).to_string()] = record_to_data(*iter);
     }
     inner_structure_writer writer;
     f_mgr.write(writer.write(root));
@@ -341,25 +369,6 @@ void table_mgr::records_write_back()
 
 void table_mgr::filter_records(logic_conn_table& table)
 {
-    typedef std::unordered_map<column_name, std::list<logic_expr>> unioned_logic_table;
-    unioned_logic_table unioned_and;
-    unioned_logic_table unioned_or;
-    if (table.contain(AND))
-    {
-        auto and_list = table.get_logic_expr_list(AND);
-        for (auto and_iter = and_list.begin(); and_iter != and_list.end(); and_iter++)
-        {
-            unioned_and[and_iter->get_attr()].push_back(*and_iter);
-        }
-    }
-    if (table.contain(OR))
-    {
-        auto or_list = table.get_logic_expr_list(OR);
-        for (auto or_iter = or_list.begin(); or_iter != or_list.end(); or_iter++)
-        {
-            unioned_or[or_iter->get_attr()].push_back(*or_iter);
-        }
-    }
 
 }
 

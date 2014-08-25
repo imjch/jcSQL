@@ -1,12 +1,12 @@
 #include "logic_expr.h"
 
 
-logic_expr::logic_expr(const std::string& attr, logic_op_type op, result_list& list, val_type v_t) :
-op(op)
+logic_expr::logic_expr(const std::string& attr, logic_op_type op,result_list& li, val_type v_t)
+:op(op)
 {
     avp.set_attr(attr);
     avp.set_val_type(v_t);
-    avp.set_result_list(list);
+    avp.set_result_list(li);
 }
 logic_expr::logic_expr()
 {
@@ -44,5 +44,10 @@ void logic_expr::add_val(const std::string& val)
 void logic_expr::set_val_type(val_type v)
 {
     avp.set_val_type(v);
+}
+
+result_list& logic_expr::get_result_list()
+{
+    return avp.get_result_list();
 }
 
